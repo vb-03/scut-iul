@@ -1,0 +1,11 @@
+16:::
+17:::
+18:::
+19:::
+20:::
+1:Cartaxo-Santarém:A1:5
+14:Lisboa-Porto:A1:10
+3:Fogueteiro-Coina:A2:3
+15:Coina-Lua:A5:15
+21:Foguetao-Lua:IC69:25
+22:Foguetao-Marte:IG49:68

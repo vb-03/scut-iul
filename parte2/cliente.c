@@ -1,7 +1,7 @@
 /******************************************************************************
  ** ISCTE-IUL: Trabalho prático 2 de Sistemas Operativos
  **
- ** Aluno: Nº:       Nome: 
+ ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
  ** Nome do Módulo: cliente.c v1
  ** Descrição/Explicação do Módulo: 
  **
@@ -36,7 +36,7 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
     // C1
     pidServidor = getPidServidor();
     exit_on_error(pidServidor, FILE_SERVIDOR);
-    // C2
+  /*   // C2
     exit_on_error(armaSinais(), "armaSinais");
     // C3
     pedido = getDadosPedidoUtilizador();
@@ -49,7 +49,7 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
     while (TRUE) {
         debug("", "Aguarda processamento por parte do Servidor");
         pause();
-    }
+    } */
 }
 
 /**
@@ -66,9 +66,22 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
  *
  * @return int Sucesso
  */
-int getPidServidor() {
+int getPidServidor(){
     debug("C1", "<");
-
+    char gPID[10];
+    int pidClient = getpid();
+    FILE* socrates;
+    socrates = fopen(FILE_SERVIDOR, "r");
+    if (socrates != NULL && my_fgets(gPID, 10, socrates) != NULL){
+        my_fgets(gPID, 10, socrates);
+        pidServidor = atoi(gPID);
+        success("C1", "PID Servidor: %d", pidServidor);
+    }
+    else{
+        error("C1", "O ficheiro %s não existe ou não existe um PID registado no ficheiro", FILE_SERVIDOR);
+        kill(pidClient, SIGKILL);
+    }
+    fclose(socrates);
     debug("C1", ">");
     return 0;
 }
@@ -176,7 +189,8 @@ void trataSinalSIGHUP(int sinalRecebido) {
  */
 void trataSinalSIGINT(int sinalRecebido) {
     debug("C9", "<");
-
+    kill(pidServidor, SIGHUP);
+    success("C9","Processo cancelado by cust)");
     debug("C9", ">");
 }
 

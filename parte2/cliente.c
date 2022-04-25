@@ -9,6 +9,7 @@
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
+#include <sys/stat.h>
 
 /* Variáveis globais */
 Passagem pedido;                        // Variável que tem o pedido enviado do Cliente para o Servidor
@@ -36,12 +37,12 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
     // C1
     pidServidor = getPidServidor();
     exit_on_error(pidServidor, FILE_SERVIDOR);
-  /*   // C2
+    // C2
     exit_on_error(armaSinais(), "armaSinais");
-    // C3
+  // C3
     pedido = getDadosPedidoUtilizador();
     exit_on_error(pedido.tipo_passagem, "getDadosPedidoUtilizador");
-    // C4
+    /*  // C4
     exit_on_error(escrevePedido(pedido), "escrevePedido");
     // C5
     exit_on_error(configuraTemporizador(), "configuraTemporizador");
@@ -94,7 +95,12 @@ int getPidServidor(){
  */
 int armaSinais() {
     debug("C2", "<");
-
+    signal(SIGUSR1,trataSinalSIGUSR1);
+    signal(SIGTERM,trataSinalSIGTERM);
+    signal(SIGHUP,trataSinalSIGHUP);
+    signal(SIGINT,trataSinalSIGINT);
+    signal(SIGALRM,trataSinalSIGALRM);
+    success("C2", "Armei os sinais");
     debug("C2", ">");
     return 0;
 }
@@ -111,7 +117,34 @@ Passagem getDadosPedidoUtilizador() {
     debug("C3", "<");
     Passagem p;
     p.tipo_passagem = -1;   // Por omissão, retorna valor inválido
+    int pidClient = getpid();
+    char tipoNomePassagem[20];
 
+        printf("Qual o tipo de portagem? \n 1 - Normal \n 2 - Via Verde \n");
+        char getTipo[20];
+        my_fgets(getTipo,10,stdin);
+        p.tipo_passagem = atoi(getTipo);
+        
+        if((1 < p.tipo_passagem && p.tipo_passagem > 2)){
+            error("C3", "Tipo Inválido");
+            kill(pidClient, SIGKILL);
+        }
+        else{
+            if(p.tipo_passagem == 1){
+                char tipoNomePassagem[20] = "Normal";
+            }
+            if(p.tipo_passagem == 2){
+                char tipoNomePassagem[20] = "Via Verde";
+            }
+        }
+
+        printf("Insira a matrícula \n");
+        my_fgets(p.matricula,9,stdin);
+                
+        printf("Insira o lanço \n");
+        my_fgets(p.lanco,50,stdin);
+
+    success("C3", "Passagem do tipo %s solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem,p.matricula,p.lanco,pidClient);
     debug("C3", ">");
     return p;
 }
@@ -126,7 +159,29 @@ Passagem getDadosPedidoUtilizador() {
  */
 int escrevePedido(Passagem dados) {
     debug("C4", "<");
+    int pidClient = getpid();
 
+    struct stat st; 
+
+    // Valida se o ficheiro existe.
+    int result = stat("nomeFifo", &st);
+    exit_on_error(result, "O ficheiro não existe!");
+
+    // Valida se o ficheiro é um FIFO.
+    if (!S_ISFIFO(st.st_mode)) {
+        printf("O ficheiro existe mas não é um FIFO!\n");
+        exit(1);
+    }
+
+
+    // escreve informações (em formato binário) nesse FIFO.
+    FILE *fifo = fopen("nomeFifo", "w");
+    exit_on_null(fifo, "O ficheiro não existe!");
+
+    if (fwrite(&dados, sizeof(dados), 1, fifo) < 1) {
+        printf("Erro na escrita do FIFO!\n");
+        exit(1);
+    }
     debug("C4", ">");
     return 0;
 }

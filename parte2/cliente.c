@@ -9,7 +9,7 @@
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
-#include <sys/stat.h>
+//#include <sys/stat.h>
 
 /* Variáveis globais */
 Passagem pedido;                        // Variável que tem o pedido enviado do Cliente para o Servidor
@@ -39,12 +39,12 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
     exit_on_error(pidServidor, FILE_SERVIDOR);
     // C2
     exit_on_error(armaSinais(), "armaSinais");
-  // C3
+    // C3
     pedido = getDadosPedidoUtilizador();
     exit_on_error(pedido.tipo_passagem, "getDadosPedidoUtilizador");
-    /*  // C4
+    // C4
     exit_on_error(escrevePedido(pedido), "escrevePedido");
-    // C5
+  /*  // C5
     exit_on_error(configuraTemporizador(), "configuraTemporizador");
     // Aguarda processamento por parte do Servidor
     while (TRUE) {
@@ -160,31 +160,28 @@ Passagem getDadosPedidoUtilizador() {
 int escrevePedido(Passagem dados) {
     debug("C4", "<");
     int pidClient = getpid();
-
-    struct stat st; 
+ //   struct stat st; 
 
     // Valida se o ficheiro existe.
-    int result = stat("nomeFifo", &st);
-    exit_on_error(result, "O ficheiro não existe!");
-
-    // Valida se o ficheiro é um FIFO.
-    if (!S_ISFIFO(st.st_mode)) {
-        printf("O ficheiro existe mas não é um FIFO!\n");
-        exit(1);
+    FILE *fifo = fopen(FILE_PEDIDOS, "r");
+    if(!fifo){
+        error("C4","O ficheiro não existe!");
+        kill(pidClient, SIGKILL);
     }
 
-
-    // escreve informações (em formato binário) nesse FIFO.
-    FILE *fifo = fopen("nomeFifo", "w");
-    exit_on_null(fifo, "O ficheiro não existe!");
-
+    // escreve informações (em formato binário) nesse FIFO.    
     if (fwrite(&dados, sizeof(dados), 1, fifo) < 1) {
-        printf("Erro na escrita do FIFO!\n");
-        exit(1);
+        error("C4","Erro na escrita do FIFO!\n");
+        kill(pidClient, SIGKILL);
     }
+    else{
+        success("C4", "Escrevi no FIFO");
+    }
+        fclose(fifo);
     debug("C4", ">");
     return 0;
-}
+    }
+
 
 /**
  * C5   Configura um alarme com o valor de MAX_ESPERA segundos (ver C10),

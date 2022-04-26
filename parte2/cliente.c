@@ -168,16 +168,16 @@ int escrevePedido(Passagem dados) {
         error("C4","O ficheiro não existe!");
         kill(pidClient, SIGKILL);
     }
-
     // escreve informações (em formato binário) nesse FIFO.    
     if (fwrite(&dados, sizeof(dados), 1, fifo) < 1) {
+        fclose(fifo);
         error("C4","Erro na escrita do FIFO!\n");
         kill(pidClient, SIGKILL);
     }
     else{
+        fclose(fifo);
         success("C4", "Escrevi no FIFO");
     }
-        fclose(fifo);
     debug("C4", ">");
     return 0;
     }

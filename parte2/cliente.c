@@ -44,13 +44,13 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
     exit_on_error(pedido.tipo_passagem, "getDadosPedidoUtilizador");
     // C4
     exit_on_error(escrevePedido(pedido), "escrevePedido");
-  /*  // C5
+    // C5
     exit_on_error(configuraTemporizador(), "configuraTemporizador");
     // Aguarda processamento por parte do Servidor
     while (TRUE) {
         debug("", "Aguarda processamento por parte do Servidor");
         pause();
-    } */
+    } 
 }
 
 /**
@@ -117,7 +117,7 @@ Passagem getDadosPedidoUtilizador() {
     debug("C3", "<");
     Passagem p;
     p.tipo_passagem = -1;   // Por omissão, retorna valor inválido
-    int pidClient = getpid();
+    p.pid_cliente = getpid();
     char tipoNomePassagem[20];
 
         printf("Qual o tipo de portagem? \n 1 - Normal \n 2 - Via Verde \n");
@@ -127,7 +127,7 @@ Passagem getDadosPedidoUtilizador() {
         
         if((1 < p.tipo_passagem && p.tipo_passagem > 2)){
             error("C3", "Tipo Inválido");
-            kill(pidClient, SIGKILL);
+            kill(p.pid_cliente, SIGKILL);
         }
         else{
             if(p.tipo_passagem == 1){
@@ -138,13 +138,13 @@ Passagem getDadosPedidoUtilizador() {
             }
         }
 
-        printf("Insira a matrícula \n");
+        printf("Insira a matrícula: \n");
         my_fgets(p.matricula,9,stdin);
                 
-        printf("Insira o lanço \n");
+        printf("Insira o lanço: \n");
         my_fgets(p.lanco,50,stdin);
 
-    success("C3", "Passagem do tipo %s solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem,p.matricula,p.lanco,pidClient);
+    success("C3", "Passagem do tipo %s solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem,p.matricula,p.lanco,p.pid_cliente);
     debug("C3", ">");
     return p;
 }
@@ -160,24 +160,26 @@ Passagem getDadosPedidoUtilizador() {
 int escrevePedido(Passagem dados) {
     debug("C4", "<");
     int pidClient = getpid();
- //   struct stat st; 
-
     // Valida se o ficheiro existe.
-    FILE *fifo = fopen(FILE_PEDIDOS, "r");
-    if(!fifo){
-        error("C4","O ficheiro não existe!");
+    int fileCheck = access(FILE_PEDIDOS, F_OK);
+    if(fileCheck != 0){
+        error("C4","O ficheiro não existe");
         kill(pidClient, SIGKILL);
     }
-    // escreve informações (em formato binário) nesse FIFO.    
-    if (fwrite(&dados, sizeof(dados), 1, fifo) < 1) {
-        fclose(fifo);
-        error("C4","Erro na escrita do FIFO!\n");
-        kill(pidClient, SIGKILL);
-    }
-    else{
-        fclose(fifo);
+    
+    // escreve informações (em formato binário) nesse FIFO.
+    else{ 
+        FILE *fifo = fopen(FILE_PEDIDOS, "wb");
+        if(fwrite(&dados, sizeof(dados), 1, fifo) < 1){
+            error("C4","Erro na escrita do FIFO!\n");
+            kill(pidClient, SIGKILL);
+        }
+        else{
         success("C4", "Escrevi no FIFO");
+        }
+        fclose(fifo);
     }
+     
     debug("C4", ">");
     return 0;
     }
@@ -192,7 +194,9 @@ int escrevePedido(Passagem dados) {
  */
 int configuraTemporizador() {
     debug("C5", "<");
-
+    alarm(MAX_ESPERA);
+    success("C5", "Inicia Espera de %d segundos", MAX_ESPERA);
+    pause();
     debug("C5", ">");
     return 0;
 }
@@ -204,7 +208,8 @@ int configuraTemporizador() {
  */
 void trataSinalSIGUSR1(int sinalRecebido) {
     debug("C6", "<");
-
+    success("C6","Passagem Iniciada");
+    passagemIniciada = TRUE; 
     debug("C6", ">");
 }
 
@@ -217,7 +222,14 @@ void trataSinalSIGUSR1(int sinalRecebido) {
  */
 void trataSinalSIGTERM(int sinalRecebido) {
     debug("C7", "<");
-
+    int pidClient = getpid();
+        if(passagemIniciada = TRUE){
+            success("C7", "Passagem Concluída");
+            kill(pidClient, SIGKILL);
+        }else{
+            error("C7", "O sinal SIGUSR1 não foi passado ao cliente");
+            kill(pidClient, SIGKILL);
+        }
     debug("C7", ">");
 }
 
@@ -227,7 +239,9 @@ void trataSinalSIGTERM(int sinalRecebido) {
  */
 void trataSinalSIGHUP(int sinalRecebido) {
     debug("C8", "<");
-
+    int pidClient = getpid();
+    success("C8", "Processo não concluído ou Incompleto");
+    kill(pidClient, SIGKILL);
     debug("C8", ">");
 }
 
@@ -254,6 +268,7 @@ void trataSinalSIGINT(int sinalRecebido) {
  */
 void trataSinalSIGALRM(int sinalRecebido) {
     debug("C10", "<");
-
+    kill(pidServidor, SIGHUP);
+    success("C10", "Timeout Cliente");
     debug("C10", ">");
 }

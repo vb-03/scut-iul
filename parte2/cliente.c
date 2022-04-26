@@ -9,7 +9,6 @@
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
-//#include <sys/stat.h>
 
 /* Variáveis globais */
 Passagem pedido;                        // Variável que tem o pedido enviado do Cliente para o Servidor
@@ -18,8 +17,8 @@ char passagemIniciada = FALSE;          // Variável que indica que o Servidor j
 
 /* Protótipos de funções */
 int getPidServidor();                   // C1: Função a ser implementada pelos alunos
-int armaSinais();                       // C2: Função a ser implementada pelos alunos
-Passagem getDadosPedidoUtilizador();    // C3: Função a ser implementada pelos alunos
+Passagem getDadosPedidoUtilizador();    // C2: Função a ser implementada pelos alunos
+int armaSinais();                       // C3: Função a ser implementada pelos alunos
 int escrevePedido(Passagem);            // C4: Função a ser implementada pelos alunos
 int configuraTemporizador();            // C5: Função a ser implementada pelos alunos
 void trataSinalSIGUSR1(int);            // C6: Função a ser implementada pelos alunos
@@ -38,10 +37,10 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
     pidServidor = getPidServidor();
     exit_on_error(pidServidor, FILE_SERVIDOR);
     // C2
-    exit_on_error(armaSinais(), "armaSinais");
-    // C3
     pedido = getDadosPedidoUtilizador();
     exit_on_error(pedido.tipo_passagem, "getDadosPedidoUtilizador");
+    // C3
+    exit_on_error(armaSinais(), "armaSinais");
     // C4
     exit_on_error(escrevePedido(pedido), "escrevePedido");
     // C5
@@ -88,25 +87,7 @@ int getPidServidor(){
 }
 
 /**
- * C2   Arma os sinais SIGUSR1 (ver C6), SIGTERM (ver C7), SIGHUP (ver C8), SIGINT (ver C9), e SIGALRM (ver C10),
- *      dando, no fim de os armar, a mensagem success C2 "Armei sinais";
- *
- * @return int Sucesso
- */
-int armaSinais() {
-    debug("C2", "<");
-    signal(SIGUSR1,trataSinalSIGUSR1);
-    signal(SIGTERM,trataSinalSIGTERM);
-    signal(SIGHUP,trataSinalSIGHUP);
-    signal(SIGINT,trataSinalSIGINT);
-    signal(SIGALRM,trataSinalSIGALRM);
-    success("C2", "Armei os sinais");
-    debug("C2", ">");
-    return 0;
-}
-
-/**
- * C3   Pede ao Condutor (utilizador) que preencha os dados referentes à passagem da viatura (Matrícula e Lanço),
+ * C2   Pede ao Condutor (utilizador) que preencha os dados referentes à passagem da viatura (Matrícula e Lanço),
  *      criando um elemento do tipo Passagem com essas informações, e preenchendo o valor pid_cliente com o PID do seu próprio processo Cliente.
  *      Em caso de ocorrer qualquer erro, dá error C3 "<Problema>", e termina o processo Cliente;
  *      caso contrário dá success C3 "Passagem do tipo <Normal | Via Verde> solicitado pela viatura com matrícula <matricula> para o Lanço <lanco> e com PID <pid_cliente>";
@@ -148,6 +129,26 @@ Passagem getDadosPedidoUtilizador() {
     debug("C3", ">");
     return p;
 }
+
+/**
+ * C3   Arma os sinais SIGUSR1 (ver C6), SIGTERM (ver C7), SIGHUP (ver C8), SIGINT (ver C9), e SIGALRM (ver C10),
+ *      dando, no fim de os armar, a mensagem success C2 "Armei sinais";
+ *
+ * @return int Sucesso
+ */
+int armaSinais() {
+    debug("C2", "<");
+    signal(SIGUSR1,trataSinalSIGUSR1);
+    signal(SIGTERM,trataSinalSIGTERM);
+    signal(SIGHUP,trataSinalSIGHUP);
+    signal(SIGINT,trataSinalSIGINT);
+    signal(SIGALRM,trataSinalSIGALRM);
+    success("C2", "Armei os sinais");
+    debug("C2", ">");
+    return 0;
+}
+
+
 
 /**
  * C4   Valida se o ficheiro com organização FIFO (named pipe) FILE_PEDIDOS existe.

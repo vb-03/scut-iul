@@ -83,7 +83,7 @@ int getPidServidor(){
     }
     fclose(socrates);
     debug("C1", ">");
-    return 0;
+    return pidServidor;
 }
 
 /**

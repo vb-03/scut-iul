@@ -1,7 +1,7 @@
 /******************************************************************************
  ** ISCTE-IUL: Trabalho prático 2 de Sistemas Operativos
  **
- ** Aluno: Nº:       Nome: 
+ ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
  ** Nome do Módulo: servidor.c v1
  ** Descrição/Explicação do Módulo: 
  **
@@ -9,37 +9,38 @@
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
+#define DEBUG_MODE FALSE                         // To disable debug messages, uncomment this line
 
 /* Variáveis globais */
-Passagem pedido;                            // Variável que tem o pedido enviado do Cliente para o Servidor
-Passagem lista_passagens[NUM_PASSAGENS];    // BD com o Número de pedidos em simultâneo que o servidor suporta
-int indice_lista;                           // Índice corrente da Lista, que foi reservado pela função reservaEntradaBD()
-Contadores stats;                           // Contadores de estatisticas
+Passagem pedido;                                    // Variável que tem o pedido enviado do Cliente para o Servidor
+Passagem lista_passagens[NUM_PASSAGENS];            // BD com o Número de pedidos em simultâneo que o servidor suporta
+int indice_lista;                                   // Índice corrente da Lista, que foi reservado pela função reservaEntradaBD()
+Contadores stats;                                   // Contadores de estatisticas
 
 /* Protótipos de funções */
-int init(Passagem*, Contadores*);           // S1:   Função a ser implementada pelos alunos
-int loadStats(Contadores*);                 // S2:   Função a ser implementada pelos alunos
-int criaFicheiroServidor();                 // S3:   Função a ser implementada pelos alunos
-int criaFifo();                             // S4:   Função a ser implementada pelos alunos
-int armaSinais();                           // S5:   Função a ser implementada pelos alunos
-Passagem lePedido();                        // S6:   Função a ser implementada pelos alunos
-int validaPedido(Passagem);                 // S7:   Função a ser implementada pelos alunos
-int reservaEntradaBD(Passagem*);            // S8:   Função a ser implementada pelos alunos
-int apagaEntradaBD(Passagem*, int);         //       Função a ser implementada pelos alunos
-int criaServidorDedicado();                 // S9:   Função a ser implementada pelos alunos
-void trataSinalSIGINT(int);                 // S10:  Função a ser implementada pelos alunos
-void trataSinalSIGHUP(int);                 // S11:  Função a ser implementada pelos alunos
-void trataSinalSIGCHLD(int);                // S12:  Função a ser implementada pelos alunos
-int sd_armaSinais();                        // SD13: Função a ser implementada pelos alunos
-int sd_iniciaProcessamento(Passagem);       // SD14: Função a ser implementada pelos alunos
-int sd_sleepRandomTime();                   // SD15: Função a ser implementada pelos alunos
-int sd_terminaProcessamento(Passagem);      // SD16: Função a ser implementada pelos alunos
-void sd_trataSinalSIGTERM(int);             // SD17: Função a ser implementada pelos alunos
+int init(Passagem*);                                // S1:   Função a ser implementada pelos alunos
+int loadStats(Contadores*);                         // S2:   Função a ser implementada pelos alunos
+int criaFicheiroServidor();                         // S3:   Função a ser implementada pelos alunos
+int criaFifo();                                     // S4:   Função a ser implementada pelos alunos
+int armaSinais();                                   // S5:   Função a ser implementada pelos alunos
+Passagem lePedido();                                // S6:   Função a ser implementada pelos alunos
+int validaPedido(Passagem);                         // S7:   Função a ser implementada pelos alunos
+int reservaEntradaBD(Passagem*, Passagem);          // S8:   Função a ser implementada pelos alunos
+int apagaEntradaBD(Passagem*, int);                 //       Função a ser implementada pelos alunos
+int criaServidorDedicado(Passagem*, int);           // S9:   Função a ser implementada pelos alunos
+void trataSinalSIGINT(int);                         // S10:  Função a ser implementada pelos alunos
+void trataSinalSIGHUP(int, siginfo_t*, void*);      // S11:  Função a ser implementada pelos alunos
+void trataSinalSIGCHLD(int);                        // S12:  Função a ser implementada pelos alunos
+int sd_armaSinais();                                // SD13: Função a ser implementada pelos alunos
+int sd_iniciaProcessamento(Passagem);               // SD14: Função a ser implementada pelos alunos
+int sd_sleepRandomTime();                           // SD15: Função a ser implementada pelos alunos
+int sd_terminaProcessamento(Passagem);              // SD16: Função a ser implementada pelos alunos
+void sd_trataSinalSIGTERM(int);                     // SD17: Função a ser implementada pelos alunos
 
 
 int main() {    // Não é suposto que os alunos alterem nada na função main()
     // S1
-    exit_on_error(init(lista_passagens, &stats), "Init");
+    exit_on_error(init(lista_passagens), "Init");
     // S2
     exit_on_error(loadStats(&stats), "loadStats");
     // S3
@@ -58,11 +59,11 @@ int main() {    // Não é suposto que os alunos alterem nada na função main()
         if (validaPedido(pedido) < 0)
             continue;
         // S8
-        indice_lista = reservaEntradaBD(lista_passagens);
+        indice_lista = reservaEntradaBD(lista_passagens, pedido);
         if (indice_lista < 0)
             continue;
         // S9
-        int pidFilho = criaServidorDedicado();
+        int pidFilho = criaServidorDedicado(lista_passagens, indice_lista);
         if (pidFilho < 0) {
             apagaEntradaBD(lista_passagens, indice_lista);
             continue;
@@ -92,12 +93,11 @@ int main() {    // Não é suposto que os alunos alterem nada na função main()
 
 /**
  * S1   Inicia a lista de passagens, preenchendo em todos os elementos o campo tipo_passagem=-1 (“Limpa” a lista de passagens).
- *      Deverá manter um contador por cada tipo de passagem e um contador para as passagens com anomalia,
- *      devendo todos os contadores ser iniciados a 0. Em seguida, dá success S1 "Init Servidor";
+ *      Em seguida, dá success S1 "Init Servidor";
  *
  * @return int Sucesso
  */
-int init(Passagem* bd, Contadores* pStats) {
+int init(Passagem* bd) {
     debug("S1", "<");
 
     debug("S1", ">");
@@ -105,9 +105,11 @@ int init(Passagem* bd, Contadores* pStats) {
 }
 
 /**
- * S2   Se o ficheiro estatisticas.dat existir na diretoria local, abre esse ficheiro e lê os seus dados (em formato binário, ver formato em S10.4)
- *      para carregar o valor guardado de todos os contadores. Se houver erro em qualquer das operações, dá error S2 "<Problema>", caso contrário,
- *      dá success S2 "Estatísticas Carregadas";
+ * S2   Deverá manter um contador por cada tipo de passagem (Normal ou Via Verde) e um contador para as passagens com anomalia.
+ *      Se o ficheiro FILE_STATS existir na diretoria local, abre-o e lê os seus dados (em formato binário, ver formato em S10.4)
+ *      para carregar o valor guardado de todos os contadores. Se houver erro na leitura do ficheiro, dá error S2 "<Problema>",
+ *      caso contrário, dá success S2 "Estatísticas Carregadas".
+ *      Se o ficheiro FILE_STATS não existir, inicia os três contadores com o valor 0 e dá success S2 "Estatísticas Iniciadas";
  *
  * @return int Sucesso
  */
@@ -120,7 +122,7 @@ int loadStats(Contadores* pStats) {
 
 /**
  * S3   Cria o ficheiro FILE_SERVIDOR, e escreve nesse ficheiro o PID do Servidor (em formato de texto).
- *      Se houver erro em qualquer das operações, dá error S3, caso contrário, dá success S3 "<PID Servidor>";
+ *      Se houver erro em qualquer das operações, dá error S3 <Problema>, caso contrário, dá success S3 "<PID Servidor>";
  *
  * @return int Sucesso
  */
@@ -145,7 +147,7 @@ int criaFifo() {
 }
 
 /**
- * S5   Arma e trata os sinais SIGINT (ver S10), SIGHUP (ver S11) e SIGCHLD (ver S12).
+ * S5   Arma e trata os sinais SIGINT (ver S10), SIGHUP (usando sigaction(), ver S11) e SIGCHLD (ver S12).
  *      Depois de armar os sinais, dá success S5 "Armei sinais";
  *
  * @return int Sucesso
@@ -199,7 +201,7 @@ int validaPedido(Passagem pedido) {
  *
  * @return int Em caso de sucesso, retorna o índice da lista preenchido. Caso contrário retorna -1
  */
-int reservaEntradaBD(Passagem* bd) {
+int reservaEntradaBD(Passagem* bd, Passagem pedido) {
     debug("S8", "<");
     int indiceLista = -1;
 
@@ -208,7 +210,7 @@ int reservaEntradaBD(Passagem* bd) {
 }
 
 /**
- * "Apaga" uma entrada da Lista de Passagens, colocando tipo_pedido = -1
+ * "Apaga" uma entrada da Lista de Passagens, colocando tipo_passagem = -1
  *
  * @return int Sucesso
  */
@@ -227,7 +229,7 @@ int apagaEntradaBD(Passagem* bd, int indiceLista) {
  *
  * @return int PID do processo filho, se for o processo Servidor (pai), 0 se for o processo Servidor Dedicado (filho), ou -1 em caso de erro.
  */
-int criaServidorDedicado() {
+int criaServidorDedicado(Passagem* bd, int indiceLista) {
     debug("S9", "<");
     int pidFilho = -1;
 
@@ -263,7 +265,7 @@ void trataSinalSIGINT(int sinalRecebido) {
  *              para que conclua o seu processamento imediatamente. Depois, dá success S10.1 "Cancelamento Shutdown Servidor Dedicado", 
  *              e recomeça o processo no passo S6.
  */
-void trataSinalSIGHUP(int sinalRecebido) {
+void trataSinalSIGHUP(int sinalRecebido, siginfo_t* info, void* uap) {
     debug("S11", "<");
 
     debug("S11", ">");

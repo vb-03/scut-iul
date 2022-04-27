@@ -118,7 +118,21 @@ int init(Passagem* bd) {
  */
 int loadStats(Contadores* pStats) {
     debug("S2", "<");
-
+    FILE *cont = fopen(FILE_STATS, "rb");
+    if(cont==NULL){
+        pStats.contadorAnomalias=0;
+        pStats.contadorNormal=0;
+        pStats.contadorViaVerde=0;
+        success("S2","Estatísticas Iniciadas");
+    }
+    if(fread(&pStats, sizeof(pStats), 1, cont) < 1){
+        error("S2","Problema ao carregar as estatisticas");
+        kill(pidServer, SIGKILL);
+    }
+    else{
+        success("S2","Estatísticas Iniciadas");
+    }
+    fclose(cont);
     debug("S2", ">");
     return 0;
 }
@@ -131,7 +145,20 @@ int loadStats(Contadores* pStats) {
  */
 int criaFicheiroServidor() {
     debug("S3", "<");
-
+    int pidServer = getpid();
+    FILE *pSV = fopen(FILE_SERVIDOR,"w");
+    if(pSV == NULL){
+        error("S3","Não foi possível criar o ficheiro");
+        kill(pidClient, SIGKILL);
+    }
+    if(fwrite(&pidServer, sizeof(pidServer), 1, cont) < 1){
+        error("S3","Erro de Escrita");
+        kill(pidClient, SIGKILL);
+    }
+    else{
+           success("S3", "%d", pidServer);
+       }
+    fclose(pSV);    
     debug("S3", ">");
     return 0;
 }

@@ -89,8 +89,8 @@ int getPidServidor(){
 /**
  * C2   Pede ao Condutor (utilizador) que preencha os dados referentes à passagem da viatura (Matrícula e Lanço),
  *      criando um elemento do tipo Passagem com essas informações, e preenchendo o valor pid_cliente com o PID do seu próprio processo Cliente.
- *      Em caso de ocorrer qualquer erro, dá error C3 "<Problema>", e termina o processo Cliente;
- *      caso contrário dá success C3 "Passagem do tipo <Normal | Via Verde> solicitado pela viatura com matrícula <matricula> para o Lanço <lanco> e com PID <pid_cliente>";
+ *      Em caso de ocorrer qualquer erro, dá error C2 "<Problema>", e termina o processo Cliente;
+ *      caso contrário dá success C2 "Passagem do tipo <Normal | Via Verde> solicitado pela viatura com matrícula <matricula> para o Lanço <lanco> e com PID <pid_cliente>";
  *
  * @return Passagem Elemento com os dados preenchidos. Se tipo_passagem = -1, significa que o elemento é imválido
  */
@@ -107,7 +107,7 @@ Passagem getDadosPedidoUtilizador() {
         p.tipo_passagem = atoi(getTipo);
         
         if((1 < p.tipo_passagem && p.tipo_passagem > 2)){
-            error("C3", "Tipo Inválido");
+            error("C2", "Tipo Inválido");
             kill(p.pid_cliente, SIGKILL);
         }
         else{
@@ -125,8 +125,8 @@ Passagem getDadosPedidoUtilizador() {
         printf("Insira o lanço: \n");
         my_fgets(p.lanco,50,stdin);
 
-    success("C3", "Passagem do tipo %s solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem,p.matricula,p.lanco,p.pid_cliente);
-    debug("C3", ">");
+    success("C2", "Passagem do tipo %s solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem,p.matricula,p.lanco,p.pid_cliente);
+    debug("C2", ">");
     return p;
 }
 
@@ -143,8 +143,8 @@ int armaSinais() {
     signal(SIGHUP,trataSinalSIGHUP);
     signal(SIGINT,trataSinalSIGINT);
     signal(SIGALRM,trataSinalSIGALRM);
-    success("C2", "Armei os sinais");
-    debug("C2", ">");
+    success("C3", "Armei os sinais");
+    debug("C3", ">");
     return 0;
 }
 
@@ -180,7 +180,6 @@ int escrevePedido(Passagem dados) {
         }
         fclose(fifo);
     }
-     
     debug("C4", ">");
     return 0;
     }

@@ -9,7 +9,11 @@
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
-#define DEBUG_MODE FALSE                         // To disable debug messages, uncomment this line
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+//#define DEBUG_MODE FALSE                         // To disable debug messages, uncomment this line
+
 
 /* Variáveis globais */
 Passagem pedido;                                    // Variável que tem o pedido enviado do Cliente para o Servidor
@@ -100,9 +104,9 @@ int main() {    // Não é suposto que os alunos alterem nada na função main()
 int init(Passagem* bd) {
     debug("S1", "<");
     for(int i = 0; i < NUM_PASSAGENS; i++){
-        bd[i].tipo_passagem="-1";
+        bd[i].tipo_passagem = -1;
     }
-    success("C1", "Init Servidor");
+    success("S1", "Init Servidor");
     debug("S1", ">");
     return 0;
 }
@@ -116,23 +120,28 @@ int init(Passagem* bd) {
  *
  * @return int Sucesso
  */
-int loadStats(Contadores* pStats) {
+int loadStats(Contadores *pStats){
     debug("S2", "<");
-    FILE *cont = fopen(FILE_STATS, "rb");
-    if(cont==NULL){
-        pStats.contadorAnomalias=0;
-        pStats.contadorNormal=0;
-        pStats.contadorViaVerde=0;
-        success("S2","Estatísticas Iniciadas");
-    }
-    if(fread(&pStats, sizeof(pStats), 1, cont) < 1){
-        error("S2","Problema ao carregar as estatisticas");
-        kill(pidServer, SIGKILL);
-    }
-    else{
-        success("S2","Estatísticas Iniciadas");
-    }
-    fclose(cont);
+    int pidServer = getpid();
+   // char str[20];
+    FILE *stats = fopen(FILE_STATS, "rb");
+    if (stats == NULL) {
+            pStats->contadorAnomalias = 0;
+            pStats->contadorNormal = 0;
+            pStats->contadorViaVerde = 0;
+            success("S2", "Estatísticas Iniciadas");
+        }
+    else{ 
+           if(fread(&pStats, sizeof(pStats), 1, stats) < 1){
+                error("S2","Problema ao carregar as estatisticas");
+                kill(pidServer, SIGKILL);
+           }
+            else{
+            fclose(stats);
+            success("S2", "Estatísticas Carregadas");
+            }
+        
+    } 
     debug("S2", ">");
     return 0;
 }
@@ -149,11 +158,11 @@ int criaFicheiroServidor() {
     FILE *pSV = fopen(FILE_SERVIDOR,"w");
     if(pSV == NULL){
         error("S3","Não foi possível criar o ficheiro");
-        kill(pidClient, SIGKILL);
+        kill(pidServer, SIGKILL);
     }
-    if(fwrite(&pidServer, sizeof(pidServer), 1, cont) < 1){
+    if(fwrite(&pidServer, sizeof(pidServer), 1, pSV) < 1){
         error("S3","Erro de Escrita");
-        kill(pidClient, SIGKILL);
+        kill(pidServer, SIGKILL);
     }
     else{
            success("S3", "%d", pidServer);
@@ -171,7 +180,15 @@ int criaFicheiroServidor() {
  */
 int criaFifo() {
     debug("S4", "<");
-
+    mkfifo(FILE_PEDIDOS,0777);
+    FILE* fifo = fopen(FILE_PEDIDOS,"rb");
+    if( fifo != NULL){
+        success("S4", "Criei FIFO");
+    }
+    else{
+        error("S4", "Erro na criação do FIFO %s",FILE_PEDIDOS);
+    }
+    fclose(fifo);
     debug("S4", ">");
     return 0;
 }

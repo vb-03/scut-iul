@@ -180,9 +180,9 @@ int criaFicheiroServidor() {
  */
 int criaFifo() {
     debug("S4", "<");
-    mkfifo(FILE_PEDIDOS,0777);
+    mkfifo(FILE_PEDIDOS,0666);
     FILE* fifo = fopen(FILE_PEDIDOS,"rb");
-    if( fifo != NULL){
+    if(fifo != NULL){
         success("S4", "Criei FIFO");
     }
     else{
@@ -201,7 +201,13 @@ int criaFifo() {
  */
 int armaSinais() {
     debug("S5", "<");
-
+    signal(SIGHUP,trataSinalSIGHUP);
+    struct sigaction sa;
+        sa.sa_flags = SA_SIGINFO;
+        sa.sa_sigaction = trataSinalSIGHUP;
+        sigaction(SIGHUP, &sa, NULL);
+    signal(SIGCHLD,trataSinalSIGCHLD);
+    success("S5","Armei sinais");
     debug("S5", ">");
     return 0;
 }

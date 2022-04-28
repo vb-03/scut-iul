@@ -222,7 +222,15 @@ Passagem lePedido() {
     debug("S6", "<");
     Passagem p;
     p.tipo_passagem = -1;   // Por omissão, retorna valor inválido
-
+    FILE *fifo = fopen(FILE_PEDIDOS, "rb");
+    if(FIFO != NULL){
+        fread((&p, sizeof(p), 1, fifo) < 1);
+        success("S6","Li FIFO");
+        fclose(fifo);
+    }
+    else{
+        error("S6","O ficheiro FIFO %s não existe",FILE_PEDIDOS);
+    }
     debug("S6", ">");
     return p;
 }

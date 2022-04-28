@@ -95,7 +95,7 @@ int getPidServidor(){
  * @return Passagem Elemento com os dados preenchidos. Se tipo_passagem = -1, significa que o elemento é imválido
  */
 Passagem getDadosPedidoUtilizador() {
-    debug("C3", "<");
+    debug("C2", "<");
     Passagem p;
     p.tipo_passagem = -1;   // Por omissão, retorna valor inválido
     p.pid_cliente = getpid();
@@ -137,7 +137,7 @@ Passagem getDadosPedidoUtilizador() {
  * @return int Sucesso
  */
 int armaSinais() {
-    debug("C2", "<");
+    debug("C3", "<");
     signal(SIGUSR1,trataSinalSIGUSR1);
     signal(SIGTERM,trataSinalSIGTERM);
     signal(SIGHUP,trataSinalSIGHUP);

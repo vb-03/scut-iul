@@ -301,7 +301,19 @@ int validaPedido(Passagem pedido)
     int reservaEntradaBD(Passagem * bd, Passagem pedido) {
         debug("S8", "<");
         int indiceLista = -1;
-
+        if(bd[NUM_PASSAGENS] != NULL){
+            error("S8","Lista de Passagens cheia");
+            stats.contadorAnomalias++;
+            return -1;
+        }
+        for(int i = 1; i <= NUM_PASSAGENS; i++){
+            bd[i] = pedido;
+                if(pedido.tipo_passagem == 1)
+                    stats.contadorNormal++;
+                if(pedido.tipo_passagem == 2)
+                    stats.contadorViaVerde++;
+            indice_lista = i;
+        }
         debug("S8", ">");
         return indiceLista;
     }

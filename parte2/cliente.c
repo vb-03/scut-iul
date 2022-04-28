@@ -197,8 +197,9 @@ int configuraTemporizador() {
     alarm(MAX_ESPERA);
     success("C5", "Inicia Espera de %d segundos", MAX_ESPERA);
     pause();
-    debug("C5", ">");
     return 0;
+    debug("C5", ">");
+
 }
 
 /**
@@ -210,6 +211,7 @@ void trataSinalSIGUSR1(int sinalRecebido) {
     debug("C6", "<");
     success("C6","Passagem Iniciada");
     passagemIniciada = TRUE; 
+    return;
     debug("C6", ">");
 }
 
@@ -223,12 +225,15 @@ void trataSinalSIGUSR1(int sinalRecebido) {
 void trataSinalSIGTERM(int sinalRecebido) {
     debug("C7", "<");
     int pidClient = getpid();
-        if(passagemIniciada = TRUE){
+        if(passagemIniciada == TRUE){
             success("C7", "Passagem Concluída");
-            kill(pidClient, SIGKILL);
+            //kill(pidClient, SIGKILL);
+                exit(1);
+
         }else{
             error("C7", "O sinal SIGUSR1 não foi passado ao cliente");
-            kill(pidClient, SIGKILL);
+            //kill(pidClient, SIGKILL);
+                exit(1);
         }
     debug("C7", ">");
 }
@@ -241,7 +246,8 @@ void trataSinalSIGHUP(int sinalRecebido) {
     debug("C8", "<");
     int pidClient = getpid();
     success("C8", "Processo não concluído ou Incompleto");
-    kill(pidClient, SIGKILL);
+    //kill(pidClient, SIGKILL);
+    exit(1);
     debug("C8", ">");
 }
 

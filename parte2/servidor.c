@@ -218,8 +218,7 @@ int armaSinais() {
  *
  * @return Passagem Elemento com os dados preenchidos. Se tipo_passagem = -1, significa que o elemento é imválido
  */
-Passagem lePedido()
-{
+Passagem lePedido(){
     debug("S6", "<");
     Passagem p;
     p.tipo_passagem = -1; // Por omissão, retorna valor inválido
@@ -227,7 +226,6 @@ Passagem lePedido()
     if (fifo != NULL)  {
         fread(&p, sizeof(p), 1, fifo);
         success("S6", "Li FIFO");
-        
     }
     else
     {
@@ -249,10 +247,9 @@ Passagem lePedido()
  *
  * @return int Sucesso
  */
-int validaPedido(Passagem pedido)
-{
+int validaPedido(Passagem pedido){
     debug("S7", "<");
-    if (pedido.tipo_passagem == 1 && pedido.tipo_passagem == 2){
+    if (pedido.tipo_passagem != 1 && pedido.tipo_passagem != 2){
         error("S7", "Tipo de passagem inválida");
         stats.contadorAnomalias++;
         return -1;
@@ -302,15 +299,19 @@ int validaPedido(Passagem pedido)
         debug("S8", "<");
         int indiceLista = -1;
         for(int i = 1; i <= NUM_PASSAGENS; i++){
-            if(bd[i].tipo_passagem == -1){
+            if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
                 bd[i] = pedido;
-                if(pedido.tipo_passagem == 1)
+                if(pedido.tipo_passagem == 1){
                     stats.contadorNormal++;
-                if(pedido.tipo_passagem == 2)
+                }
+                if(pedido.tipo_passagem == 2){
                     stats.contadorViaVerde++;
-                return indice_lista = i;
+                }
+                indiceLista = i;
+                success("S8","Entrada %d preenchida",indiceLista);
+                return indiceLista;
              }
-
+             return indiceLista;
         }
             error("S8","Lista de Passagens cheia");
             stats.contadorAnomalias++;
@@ -324,10 +325,9 @@ int validaPedido(Passagem pedido)
      *
      * @return int Sucesso
      */
-    int apagaEntradaBD(Passagem * bd, int indiceLista)
-    {
+    int apagaEntradaBD(Passagem * bd, int indiceLista) {
         debug("", "<");
-        bd[indice_lista].tipo_passagem = -1;
+        bd[indiceLista].tipo_passagem = -1;
         debug("", ">");
         return 0;
     }
@@ -340,11 +340,17 @@ int validaPedido(Passagem pedido)
      *
      * @return int PID do processo filho, se for o processo Servidor (pai), 0 se for o processo Servidor Dedicado (filho), ou -1 em caso de erro.
      */
-    int criaServidorDedicado(Passagem * bd, int indiceLista)
-    {
+    int criaServidorDedicado(Passagem * bd, int indiceLista){
         debug("S9", "<");
         int pidFilho = -1;
-
+        pidFilho = fork();
+        if(pidFilho == -1){
+            error("S9","Fork");
+        }
+        if(pidFilho !=0){
+            bd[indiceLista].pid_servidor_dedicado = pidFilho;
+            success("S9","Criado Servidor Dedicado com PID %d", pidFilho);
+        }
         debug("S9", ">");
         return pidFilho;
     }

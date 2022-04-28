@@ -302,14 +302,15 @@ int validaPedido(Passagem pedido)
         debug("S8", "<");
         int indiceLista = -1;
         for(int i = 1; i <= NUM_PASSAGENS; i++){
-            if(bd[i].tipo_passagem = -1){
+            if(bd[i].tipo_passagem == -1){
                 bd[i] = pedido;
-                if(pedido.tipo_passagem == -1)
+                if(pedido.tipo_passagem == 1)
                     stats.contadorNormal++;
                 if(pedido.tipo_passagem == 2)
                     stats.contadorViaVerde++;
                 return indice_lista = i;
-        }
+             }
+
         }
             error("S8","Lista de Passagens cheia");
             stats.contadorAnomalias++;

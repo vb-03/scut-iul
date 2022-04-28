@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-//#define DEBUG_MODE FALSE                         // To disable debug messages, uncomment this line
+#define DEBUG_MODE FALSE                         // To disable debug messages, uncomment this line
 
 
 /* Variáveis globais */
@@ -165,7 +165,7 @@ int criaFicheiroServidor() {
         kill(pidServer, SIGKILL);
     }
     else{
-           success("S3", "%d", pidServer);
+           success("S3", "PID Server: %d", pidServer);
        }
     fclose(pSV);    
     debug("S3", ">");
@@ -180,15 +180,15 @@ int criaFicheiroServidor() {
  */
 int criaFifo() {
     debug("S4", "<");
-    mkfifo(FILE_PEDIDOS,0666);
-    FILE* fifo = fopen(FILE_PEDIDOS,"rb");
-    if(fifo != NULL){
+    int verfifo = mkfifo(FILE_PEDIDOS,0666);
+   // FILE* fifo = fopen(FILE_PEDIDOS,"rb");
+    if(verfifo <0){
         success("S4", "Criei FIFO");
     }
     else{
         error("S4", "Erro na criação do FIFO %s",FILE_PEDIDOS);
     }
-    fclose(fifo);
+    //fclose(fifo);
     debug("S4", ">");
     return 0;
 }
@@ -251,8 +251,7 @@ Passagem lePedido()
 int validaPedido(Passagem pedido)
 {
     debug("S7", "<");
-    if (pedido.tipo_passagem != 1 && pedido.tipo_passagem != 2)
-    {
+    if (pedido.tipo_passagem == 1 && pedido.tipo_passagem == 2){
         error("S7", "Tipo de passagem inválida");
         stats.contadorAnomalias++;
         return -1;
@@ -301,7 +300,7 @@ int validaPedido(Passagem pedido)
     int reservaEntradaBD(Passagem * bd, Passagem pedido) {
         debug("S8", "<");
         int indiceLista = -1;
-        if(bd[NUM_PASSAGENS].tipo_passagem != -1){
+        if(bd[NUM_PASSAGENS].tipo_passagem != 1 || bd[NUM_PASSAGENS].tipo_passagem != 2){
             error("S8","Lista de Passagens cheia");
             stats.contadorAnomalias++;
             return -1;

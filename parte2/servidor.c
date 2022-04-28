@@ -227,12 +227,13 @@ Passagem lePedido()
     if (fifo != NULL)  {
         fread(&p, sizeof(p), 1, fifo);
         success("S6", "Li FIFO");
-        fclose(fifo);
+        
     }
     else
     {
         error("S6", "O ficheiro FIFO %s não existe", FILE_PEDIDOS);
     }
+    fclose(fifo); //TEM QUE FICAR FORA
     debug("S6", ">");
     return p;
 }
@@ -300,19 +301,19 @@ int validaPedido(Passagem pedido)
     int reservaEntradaBD(Passagem * bd, Passagem pedido) {
         debug("S8", "<");
         int indiceLista = -1;
-        if(bd[NUM_PASSAGENS].tipo_passagem != 1 || bd[NUM_PASSAGENS].tipo_passagem != 2){
-            error("S8","Lista de Passagens cheia");
-            stats.contadorAnomalias++;
-            return -1;
-        }
         for(int i = 1; i <= NUM_PASSAGENS; i++){
-            bd[i] = pedido;
-                if(pedido.tipo_passagem == 1)
+            if(bd[i].tipo_passagem = -1){
+                bd[i] = pedido;
+                if(pedido.tipo_passagem == -1)
                     stats.contadorNormal++;
                 if(pedido.tipo_passagem == 2)
                     stats.contadorViaVerde++;
-            indice_lista = i;
+                return indice_lista = i;
         }
+        }
+            error("S8","Lista de Passagens cheia");
+            stats.contadorAnomalias++;
+            return -1;
         debug("S8", ">");
         return indiceLista;
     }
@@ -325,7 +326,7 @@ int validaPedido(Passagem pedido)
     int apagaEntradaBD(Passagem * bd, int indiceLista)
     {
         debug("", "<");
-
+        bd[indice_lista].tipo_passagem = -1;
         debug("", ">");
         return 0;
     }

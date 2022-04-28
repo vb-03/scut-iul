@@ -16,6 +16,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 /******************************************************************************
  *  Macros para tratamento de mensagens de DEBUG
@@ -26,14 +27,18 @@
 /**
  *  Impressão de mensagens de DEBUG incluindo o módulo e a linha de código. Para ativar, alterar DEBUG_MODE para 1
  */
-#define DEBUG_MODE FALSE   // Se estiver a TRUE, apresentará mensagens de DEBUG, caso contrário, não apresenta
+#define DEBUG_MODE TRUE   // Se estiver a TRUE, apresentará mensagens de DEBUG, caso contrário, não apresenta
 
 /**
- *  Escreve uma mensagem de debug (parâmetros iguais ao printf) se DEBUG_MODE estiver a 1
+ *  Escreve uma mensagem de debug (parâmetros iguais ao printf) se DEBUG_MODE estiver a TRUE
  *  @param passo (o passo do enunciado) ... os argumentos são os mesmos que os do printf(), logo recebe uma string de formatação e depois um número variável de argumentos
  */
 #define debug(passo, fmt, ...) do { if (DEBUG_MODE) fprintf(stderr, "@@Debug@@:%s:%d:%s(): {" passo "} " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__); } while (0)
 
+/**
+ *  Escreve uma mensagem de debug (parâmetros iguais ao printf) se DEBUG_MODE estiver a TRUE
+ */
+#define debug1(fmt, ...) do { if (DEBUG_MODE) fprintf(stderr, "@@Debug@@:%s:%d:%s(): " fmt "\n", __FILE__, __LINE__, __func__, ## __VA_ARGS__); } while (0)
 
 /******************************************************************************
  *  Macros para impressão de mensagens de sucesso e de erro
@@ -102,6 +107,16 @@
  */
 #define my_gets(buffer, buffer_size) my_fgets(buffer, buffer_size, stdin)
 
+/******************************************************************************
+ *  Macros utilitárias
+ ******************************************************************************/
+
+#define my_rand() ({            \
+    struct timeval tv;          \
+    gettimeofday(&tv, NULL);    \
+    srand(tv.tv_usec);          \
+    rand();                     \
+})
 
 /* OS ALUNOS NÃO DEVERÃO ACRESCENTAR NADA A ESTE FICHEIRO!!! */
 

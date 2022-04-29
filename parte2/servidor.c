@@ -350,6 +350,7 @@ int validaPedido(Passagem pedido){
         if(pidFilho !=0){
             bd[indiceLista].pid_servidor_dedicado = pidFilho;
             success("S9","Criado Servidor Dedicado com PID %d", pidFilho);
+             return pidFilho;
         }
         debug("S9", ">");
         return pidFilho;
@@ -367,10 +368,46 @@ int validaPedido(Passagem pedido){
      *              Em caso de erro, dá error S10.4, caso contrário, dá success S10.4 "Estatísticas Guardadas";
      *      S10.5   Dá success S10.5 e termina o processo Servidor.
      */
-    void trataSinalSIGINT(int sinalRecebido)
-    {
+    void trataSinalSIGINT(int sinalRecebido){
         debug("S10", "<");
-
+        int pidServer = getpid();
+        success("S10", "Shutdown Servidor");
+        //S10.1
+        for(int i = 0; i < NUM_PASSAGENS; i++){
+            kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
+            success("S10.1", "Shutdown Servidores Dedicados");
+        }
+        //S10.2
+        if(remove(FILE_SERVIDOR) != 0){
+        error("S10.2", "Erro na remoção do ficheiro %s", FILE_SERVIDOR);
+        }
+        else{
+        success("S10.2", "O ficheiro %s foi removido", FILE_SERVIDOR);
+        }
+        //S10.3
+        if(remove(FILE_PEDIDOS) != 0){
+        error("S10.2", "Erro na remoção do ficheiro %s", FILE_PEDIDOS);
+        }
+        else{
+        success("S10.2", "O ficheiro %s foi removido", FILE_PEDIDOS);
+        }
+        //S10.4
+        FILE* st = fopen(FILE_STATS,"wb");
+        if(st == NULL){
+            error("S10.4","Erro ao abrir o ficheiro %s",FILE_STATS);
+        }
+        else{
+            if(fwrite(&stats, sizeof(stats), 1, st) < 1){
+            error("S10.4", "Erro a carregar estatísticas");
+            }   
+            else{
+            success("S10.4", "Estatísticas guardadas");
+            }
+        }
+        fclose(st);
+        //S10.5
+        kill(pidServer,SIGKILL);
+        success("S10.5","Servidor encerrado com sucesso");
         debug("S10", ">");
     }
 
@@ -387,7 +424,7 @@ int validaPedido(Passagem pedido){
     void trataSinalSIGHUP(int sinalRecebido, siginfo_t *info, void *uap)
     {
         debug("S11", "<");
-
+        success("S11", "Cancel");
         debug("S11", ">");
     }
 

@@ -181,14 +181,14 @@ int criaFicheiroServidor() {
 int criaFifo() {
     debug("S4", "<");
     int verfifo = mkfifo(FILE_PEDIDOS,0666);
-   // FILE* fifo = fopen(FILE_PEDIDOS,"rb");
+    FILE* fifo = fopen(FILE_PEDIDOS,"rb");
     if(verfifo <0){
         success("S4", "Criei FIFO");
     }
     else{
         error("S4", "Erro na criação do FIFO %s",FILE_PEDIDOS);
     }
-    //fclose(fifo);
+    fclose(fifo);
     debug("S4", ">");
     return 0;
 }
@@ -298,7 +298,7 @@ int validaPedido(Passagem pedido){
     int reservaEntradaBD(Passagem * bd, Passagem pedido) {
         debug("S8", "<");
         int indiceLista = -1;
-        for(int i = 1; i <= NUM_PASSAGENS; i++){
+        for(int i = 0; i < NUM_PASSAGENS; i++){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
                 bd[i] = pedido;
                 if(pedido.tipo_passagem == 1){
@@ -343,7 +343,7 @@ int validaPedido(Passagem pedido){
     int criaServidorDedicado(Passagem * bd, int indiceLista){
         debug("S9", "<");
         int pidFilho = -1;
-        pidFilho = fork();
+                pidFilho = fork();
         if(pidFilho == -1){
             error("S9","Fork");
         }
@@ -352,8 +352,9 @@ int validaPedido(Passagem pedido){
             success("S9","Criado Servidor Dedicado com PID %d", pidFilho);
              return pidFilho;
         }
-        debug("S9", ">");
         return pidFilho;
+        debug("S9", ">");
+        
     }
 
     /**
@@ -427,7 +428,17 @@ int validaPedido(Passagem pedido){
         success("S11", "Cancel");
         //S11.1
         int pidCancelRequest = info->si_pid;
-        
+        for(int i = 0; i < NUM_PASSAGENS; i++){
+            if(lista_passagens[i].pid_cliente == pidCancelRequest){
+            success("S11.2", "Cancelamento %d", lista_passagens[i].pid_servidor_dedicado);
+            kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
+            success("S10.1", "Cancelamento Shutdown Servidor Dedicado");
+            return;
+                }
+            else{
+            error("S11.2", "Não encontrei a passagem correspondente"); 
+                    }
+                }
         debug("S11", ">");
     }
 
@@ -439,11 +450,23 @@ int validaPedido(Passagem pedido){
      *              Se não encontrar, dá error S12.2. Caso contrário, “apaga” a entrada da Lista de Passagens
      *              correspondente (colocando tipo_passagem=-1), dá success S12.2, e recomeça o processo no passo S6.
      */
-    void trataSinalSIGCHLD(int sinalRecebido)
-    {
+    void trataSinalSIGCHLD(int sinalRecebido){
         debug("S12", "<");
-
-        debug("S12", ">");
+        success("S12","Servidor Dedicado Terminou");
+        //S12.1
+        int pidFilho = wait(NULL);
+        success("S12.1", "Terminou Servidor Dedicado %d", pidFilho);
+        //S12.2
+        for(int i=0; i < NUM_PASSAGENS; i++) {
+            if(lista_passagens[i].pid_servidor_dedicado == pidFilho) {
+                apagaEntradaBD(lista_passagens, i);
+                success("S12.2", "Entrada Eliminada");
+                return;
+            }
+            error("S12.2", "Não encontrei a passagem correspondente");
+        }
+            success("S12.1", "Terminou Servidor Dedicado %d", pidFilho);
+            debug("S12", ">");
     }
 
     /**
@@ -452,10 +475,11 @@ int validaPedido(Passagem pedido){
      *
      * @return int Sucesso
      */
-    int sd_armaSinais()
-    {
+    int sd_armaSinais() {
         debug("SD13", "<");
-
+        signal(SIGTERM, sd_trataSinalSIGTERM);
+        signal(SIGINT, SIG_IGN);
+        success("SD13", "Servidor Dedicado Armei sinais");
         debug("SD13", ">");
         return 0;
     }
@@ -470,7 +494,9 @@ int validaPedido(Passagem pedido){
     int sd_iniciaProcessamento(Passagem pedido)
     {
         debug("SD14", "<");
-
+        int pidFilho = getpid();
+        kill(pedido.pid_cliente, SIGUSR1);
+        success("SD14", "Início de Passagem %d %d", pedido.pid_cliente, pidFilho);
         debug("SD14", ">");
         return 0;
     }
@@ -481,10 +507,11 @@ int validaPedido(Passagem pedido){
      *
      * @return int Sucesso
      */
-    int sd_sleepRandomTime()
-    {
+    int sd_sleepRandomTime(){
         debug("SD15", "<");
-
+        int aleatorio = (my_rand() % (MAX_PROCESSAMENTO - MIN_PROCESSAMENTO + 1)) + MIN_PROCESSAMENTO;
+        success("SD15", "%d", aleatorio);
+        sleep(aleatorio);
         debug("SD15", ">");
         return 0;
     }
@@ -498,7 +525,10 @@ int validaPedido(Passagem pedido){
     int sd_terminaProcessamento(Passagem pedido)
     {
         debug("SD16", "<");
-
+        int pidFilho = getpid();
+        kill(pedido.pid_cliente, SIGTERM);
+        success("SD16", "Fim Passagem %d %d", pedido.pid_cliente, pidFilho);
+        kill(pidFilho, SIGKILL);
         debug("SD16", ">");
         return 0;
     }
@@ -508,9 +538,11 @@ int validaPedido(Passagem pedido){
      *      Se o Servidor Dedicado receber esse sinal, envia o sinal SIGHUP ao <pid_cliente>,
      *      dá success SD17 "Processamento Cancelado", e termina o Servidor Dedicado.
      */
-    void sd_trataSinalSIGTERM(int sinalRecebido)
-    {
+    void sd_trataSinalSIGTERM(int sinalRecebido){
         debug("SD17", "<");
-
+        int pidFilho = getpid();
+        kill(pedido.pid_cliente, SIGHUP);
+        success("SD17", "Processamento Cancelado");
+        kill(pidFilho, SIGKILL);
         debug("SD17", ">");
     }

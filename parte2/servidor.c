@@ -226,12 +226,12 @@ Passagem lePedido(){
     if (fifo != NULL)  {
         fread(&p, sizeof(p), 1, fifo);
         success("S6", "Li FIFO");
+        fclose(fifo);
     }
-    else
-    {
+    else{
         error("S6", "O ficheiro FIFO %s não existe", FILE_PEDIDOS);
     }
-    fclose(fifo); //TEM QUE FICAR FORA
+     //TEM QUE FICAR FORA
     debug("S6", ">");
     return p;
 }
@@ -425,6 +425,9 @@ int validaPedido(Passagem pedido){
     {
         debug("S11", "<");
         success("S11", "Cancel");
+        //S11.1
+        int pidCancelRequest = info->si_pid;
+        
         debug("S11", ">");
     }
 

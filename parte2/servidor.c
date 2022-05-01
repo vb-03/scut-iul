@@ -132,7 +132,7 @@ int loadStats(Contadores *pStats){
             success("S2", "Estatísticas Iniciadas");
         }
     else{ 
-           if(fread(&pStats, sizeof(pStats), 1, stats) < 1){
+           if(fread(pStats, sizeof(*pStats), 1, stats) < 1){
                 error("S2","Problema ao carregar as estatisticas");
                 kill(pidServer, SIGKILL);
            }
@@ -301,6 +301,7 @@ int validaPedido(Passagem pedido){
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
                 bd[i] = pedido;
+                bd[i].tipo_passagem = pedido.tipo_passagem;
                 if(pedido.tipo_passagem == 1){
                     stats.contadorNormal++;
                 }
@@ -343,14 +344,14 @@ int validaPedido(Passagem pedido){
     int criaServidorDedicado(Passagem * bd, int indiceLista){
         debug("S9", "<");
         int pidFilho = -1;
-                pidFilho = fork();
+        pidFilho = fork();
         if(pidFilho == -1){
             error("S9","Fork");
         }
         if(pidFilho !=0){
             bd[indiceLista].pid_servidor_dedicado = pidFilho;
             success("S9","Criado Servidor Dedicado com PID %d", pidFilho);
-             return pidFilho;
+            //return pidFilho;
         }
         return pidFilho;
         debug("S9", ">");
@@ -375,7 +376,9 @@ int validaPedido(Passagem pedido){
         success("S10", "Shutdown Servidor");
         //S10.1
         for(int i = 0; i < NUM_PASSAGENS; i++){
-            kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
+            if (lista_passagens[i].pid_servidor_dedicado > 0){
+                kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
+            }
             success("S10.1", "Shutdown Servidores Dedicados");
         }
         //S10.2
@@ -419,7 +422,7 @@ int validaPedido(Passagem pedido){
      *      S11.2   Pesquisa na Lista de Passagens pela entrada correspondente ao PID do Cliente que cancelou. Se não encontrar, dá error S11.2.
      *              Caso contrário, descobre o PID do Servidor Dedicado correspondente, dá success S11.2 "Cancelamento <PID Filho>";
      *      S11.3   Envia o sinal SIGTERM ao Servidor Dedicado da Lista de Passagens correspondente ao cancelamento,
-     *              para que conclua o seu processamento imediatamente. Depois, dá success S10.1 "Cancelamento Shutdown Servidor Dedicado",
+     *              para que conclua o seu processamento imediatamente. Depois, dá success S11.3 "Cancelamento Shutdown Servidor Dedicado",
      *              e recomeça o processo no passo S6.
      */
     void trataSinalSIGHUP(int sinalRecebido, siginfo_t *info, void *uap)
@@ -432,7 +435,7 @@ int validaPedido(Passagem pedido){
             if(lista_passagens[i].pid_cliente == pidCancelRequest){
             success("S11.2", "Cancelamento %d", lista_passagens[i].pid_servidor_dedicado);
             kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
-            success("S10.1", "Cancelamento Shutdown Servidor Dedicado");
+            success("S11.3", "Cancelamento Shutdown Servidor Dedicado");
             return;
                 }
             else{

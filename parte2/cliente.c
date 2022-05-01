@@ -176,9 +176,9 @@ int escrevePedido(Passagem dados) {
             kill(pidClient, SIGKILL);
         }
         else{
+        fclose(fifo);
         success("C4", "Escrevi no FIFO");
         }
-        fclose(fifo);
     }
     debug("C4", ">");
     return 0;
@@ -227,13 +227,11 @@ void trataSinalSIGTERM(int sinalRecebido) {
     int pidClient = getpid();
         if(passagemIniciada == TRUE){
             success("C7", "Passagem Concluída");
-            //kill(pidClient, SIGKILL);
-                exit(1);
+            exit(1);
 
         }else{
             error("C7", "O sinal SIGUSR1 não foi passado ao cliente");
-            //kill(pidClient, SIGKILL);
-                exit(1);
+            exit(1);
         }
     debug("C7", ">");
 }
@@ -246,7 +244,6 @@ void trataSinalSIGHUP(int sinalRecebido) {
     debug("C8", "<");
     int pidClient = getpid();
     success("C8", "Processo não concluído ou Incompleto");
-    //kill(pidClient, SIGKILL);
     exit(1);
     debug("C8", ">");
 }
@@ -262,7 +259,7 @@ void trataSinalSIGHUP(int sinalRecebido) {
 void trataSinalSIGINT(int sinalRecebido) {
     debug("C9", "<");
     kill(pidServidor, SIGHUP);
-    success("C9","Processo cancelado by cust)");
+    success("C9","Processo Cancelado pelo Cliente");
     debug("C9", ">");
 }
 

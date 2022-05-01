@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #define DEBUG_MODE FALSE                         // To disable debug messages, uncomment this line
 
 
@@ -155,19 +156,25 @@ int loadStats(Contadores *pStats){
 int criaFicheiroServidor() {
     debug("S3", "<");
     int pidServer = getpid();
-    FILE *pSV = fopen(FILE_SERVIDOR,"w");
+    FILE* pSV = fopen(FILE_SERVIDOR,"w");
     if(pSV == NULL){
         error("S3","Não foi possível criar o ficheiro");
         kill(pidServer, SIGKILL);
     }
-    if(fwrite(&pidServer, sizeof(pidServer), 1, pSV) < 1){
-        error("S3","Erro de Escrita");
-        kill(pidServer, SIGKILL);
-    }
     else{
-           success("S3", "PID Server: %d", pidServer);
+           fprintf(pSV, "%d", pidServer);
+           fclose(pSV);
+           char checkEmpty[20];
+           pSV = fopen(FILE_SERVIDOR,"r");
+            if (my_fgets(checkEmpty, 20, pSV) == NULL){
+                error("S3", "O ficheiro %s não existe ou não foi criado", FILE_SERVIDOR);
+                kill(pidServer, SIGKILL);
+                         }
+            else{
+                success("S3", "PID Server: %d", pidServer);
+            }
        }
-    fclose(pSV);    
+       
     debug("S3", ">");
     return 0;
 }
@@ -181,14 +188,12 @@ int criaFicheiroServidor() {
 int criaFifo() {
     debug("S4", "<");
     int verfifo = mkfifo(FILE_PEDIDOS,0666);
-    FILE* fifo = fopen(FILE_PEDIDOS,"rb");
-    if(verfifo <0){
+    if(verfifo < 0){
         success("S4", "Criei FIFO");
     }
     else{
         error("S4", "Erro na criação do FIFO %s",FILE_PEDIDOS);
     }
-    fclose(fifo);
     debug("S4", ">");
     return 0;
 }
@@ -254,18 +259,14 @@ int validaPedido(Passagem pedido){
         stats.contadorAnomalias++;
         return -1;
     }
-    else
-    {
-        if (pedido.matricula == NULL)
-        {
+    else {
+        if (pedido.matricula == NULL){
             error("S7", "Matrícula inválida");
             stats.contadorAnomalias++;
             return -1;
         }
-        else
-        {
-            if (pedido.lanco == NULL)
-            {
+        else{
+            if (pedido.lanco == NULL){
                 error("S7", "Lanço inválida");
                 stats.contadorAnomalias++;
                 return -1;
@@ -297,7 +298,7 @@ int validaPedido(Passagem pedido){
      */
     int reservaEntradaBD(Passagem * bd, Passagem pedido) {
         debug("S8", "<");
-        int indiceLista = -1;
+        int indice_lista = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
                 bd[i] = pedido;
@@ -308,17 +309,18 @@ int validaPedido(Passagem pedido){
                 if(pedido.tipo_passagem == 2){
                     stats.contadorViaVerde++;
                 }
-                indiceLista = i;
-                success("S8","Entrada %d preenchida",indiceLista);
-                return indiceLista;
+                indice_lista = i;
+                success("S8","Entrada %d preenchida",indice_lista);
+                return indice_lista;
              }
-             return indiceLista;
+             return indice_lista;
         }
             error("S8","Lista de Passagens cheia");
             stats.contadorAnomalias++;
+            kill(pedido.pid_cliente, SIGHUP);
             return -1;
         debug("S8", ">");
-        return indiceLista;
+        return indice_lista;
     }
 
     /**
@@ -351,10 +353,10 @@ int validaPedido(Passagem pedido){
         if(pidFilho !=0){
             bd[indiceLista].pid_servidor_dedicado = pidFilho;
             success("S9","Criado Servidor Dedicado com PID %d", pidFilho);
-            //return pidFilho;
+            return -1;
         }
-        return pidFilho;
         debug("S9", ">");
+        return pidFilho;
         
     }
 
@@ -379,8 +381,8 @@ int validaPedido(Passagem pedido){
             if (lista_passagens[i].pid_servidor_dedicado > 0){
                 kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
             }
-            success("S10.1", "Shutdown Servidores Dedicados");
         }
+        success("S10.1", "Shutdown Servidores Dedicados");
         //S10.2
         if(remove(FILE_SERVIDOR) != 0){
         error("S10.2", "Erro na remoção do ficheiro %s", FILE_SERVIDOR);
@@ -390,10 +392,10 @@ int validaPedido(Passagem pedido){
         }
         //S10.3
         if(remove(FILE_PEDIDOS) != 0){
-        error("S10.2", "Erro na remoção do ficheiro %s", FILE_PEDIDOS);
+        error("S10.3", "Erro na remoção do ficheiro %s", FILE_PEDIDOS);
         }
         else{
-        success("S10.2", "O ficheiro %s foi removido", FILE_PEDIDOS);
+        success("S10.3", "O ficheiro %s foi removido", FILE_PEDIDOS);
         }
         //S10.4
         FILE* st = fopen(FILE_STATS,"wb");
@@ -425,12 +427,12 @@ int validaPedido(Passagem pedido){
      *              para que conclua o seu processamento imediatamente. Depois, dá success S11.3 "Cancelamento Shutdown Servidor Dedicado",
      *              e recomeça o processo no passo S6.
      */
-    void trataSinalSIGHUP(int sinalRecebido, siginfo_t *info, void *uap)
-    {
+    void trataSinalSIGHUP(int sinalRecebido, siginfo_t *info, void *uap){
         debug("S11", "<");
         success("S11", "Cancel");
         //S11.1
         int pidCancelRequest = info->si_pid;
+        success("S11.1", "Cancelamento enviado pelo Processo %d", pidCancelRequest);
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(lista_passagens[i].pid_cliente == pidCancelRequest){
             success("S11.2", "Cancelamento %d", lista_passagens[i].pid_servidor_dedicado);
@@ -438,7 +440,7 @@ int validaPedido(Passagem pedido){
             success("S11.3", "Cancelamento Shutdown Servidor Dedicado");
             return;
                 }
-            else{
+            if(i = NUM_PASSAGENS - 1) { 
             error("S11.2", "Não encontrei a passagem correspondente"); 
                     }
                 }

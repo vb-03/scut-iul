@@ -478,7 +478,7 @@ int validaPedido(Passagem pedido){
                 success("S12.2", "Entrada Eliminada");
                 return;
             }
-            if(i = NUM_PASSAGENS - 1) { 
+            if(i == NUM_PASSAGENS - 1) { 
             error("S12.2", "Não encontrei a passagem correspondente");
             return;
             }

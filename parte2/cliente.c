@@ -226,7 +226,7 @@ void trataSinalSIGUSR1(int sinalRecebido) {
 void trataSinalSIGTERM(int sinalRecebido) {
     debug("C7", "<");
     int pidClient = getpid();
-        if(passagemIniciada = TRUE){
+        if(passagemIniciada == TRUE){
             success("C7", "Passagem Concluída");
             exit(0);
         }

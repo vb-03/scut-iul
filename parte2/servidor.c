@@ -266,14 +266,14 @@ int validaPedido(Passagem pedido){
         return -1;
     }
     else {
-        if (pedido.matricula == NULL || strcmp(pedido.matricula,"")==0 ){ //Tenho que fazer o strcmp???? em branco? lmao ""
+        if (pedido.matricula == NULL || strcmp(pedido.matricula,"") == 0 ){ 
             error("S7", "Matrícula inválida");
             stats.contadorAnomalias++;
             kill(pedido.pid_cliente,SIGHUP);
             return -1;
         }
         else{
-            if (pedido.lanco == NULL || strcmp(pedido.lanco,"")==0 ){
+            if (pedido.lanco == NULL || strcmp(pedido.lanco,"") == 0 ){
                 error("S7", "Lanço inválida");
                 stats.contadorAnomalias++;
                 kill(pedido.pid_cliente,SIGHUP);
@@ -283,7 +283,7 @@ int validaPedido(Passagem pedido){
                 if(pedido.pid_cliente <= 0){
                 error("S7", "PID Inválido");
                 stats.contadorAnomalias++;
-                kill(pedido.pid_cliente,SIGHUP);
+                //kill(pedido.pid_cliente,SIGHUP);
                 return -1;
                 }
                 else{            
@@ -292,7 +292,7 @@ int validaPedido(Passagem pedido){
                         }
                     if(pedido.tipo_passagem == 2){
                     char tipoNomePassagem[20] = "Via Verde";
-                        }
+                    }
                 success("S7", "Chegou novo pedido do tipo %s solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem, pedido.matricula, pedido.lanco, pedido.pid_cliente);
                 }
             }

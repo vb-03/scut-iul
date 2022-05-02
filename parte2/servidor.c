@@ -416,13 +416,13 @@ int validaPedido(Passagem pedido){
             error("S10.4", "Erro a carregar estatísticas");
             }   
             else{
-            success("S10.4", "Estatísticas guardadas");
+            success("S10.4", "Estatísticas Guardadas");
             }
         }
         fclose(st);
         //S10.5
-        kill(pidServer,SIGKILL);
-        success("S10.5","Servidor encerrado com sucesso");
+        success("S10.5","Terminando servidor");
+        exit(0);
         debug("S10", ">");
     }
 

@@ -231,7 +231,7 @@ void trataSinalSIGTERM(int sinalRecebido) {
             exit(0);
         }
             error("C7", "O sinal SIGUSR1 não foi passado ao cliente");
-            exit(0);        
+            exit(-1);        
     debug("C7", ">");
 }
 

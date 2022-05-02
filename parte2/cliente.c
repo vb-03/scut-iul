@@ -106,18 +106,20 @@ Passagem getDadosPedidoUtilizador() {
         my_fgets(getTipo,10,stdin);
         p.tipo_passagem = atoi(getTipo);
         
-//        if((1 < p.tipo_passagem && p.tipo_passagem > 2)){
-//            error("C2", "Tipo Inválido");
-//            kill(p.pid_cliente, SIGKILL);
-//        }
-//        else{
-            if(p.tipo_passagem == 1){
+       /* if((1 < p.tipo_passagem && p.tipo_passagem > 2)){
+            error("C2", "Tipo Inválido");
+            kill(p.pid_cliente, SIGKILL);
+        }
+        else{ */
+        if(p.tipo_passagem == 1){
                 char tipoNomePassagem[20] = "Normal";
+               // tipoNomePassagem[ strlen(tipoNomePassagem)-1 ] = '\0';
             }
-            if(p.tipo_passagem == 2){
+        if(p.tipo_passagem == 2){
                 char tipoNomePassagem[20] = "Via Verde";
+                // tipoNomePassagem[ strlen(tipoNomePassagem)-1 ] = '\0';
             }
-//       }
+       //}
 
         printf("Insira a matrícula: \n");
         my_fgets(p.matricula,9,stdin);
@@ -125,7 +127,7 @@ Passagem getDadosPedidoUtilizador() {
         printf("Insira o lanço: \n");
         my_fgets(p.lanco,50,stdin);
 
-    success("C2", "Passagem do tipo %s solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem,p.matricula,p.lanco,p.pid_cliente);
+    success("C2", "Passagem do tipo %s solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem, p.matricula,p.lanco,p.pid_cliente);
     debug("C2", ">");
     return p;
 }
@@ -143,7 +145,7 @@ int armaSinais() {
     signal(SIGHUP,trataSinalSIGHUP);
     signal(SIGINT,trataSinalSIGINT);
     signal(SIGALRM,trataSinalSIGALRM);
-    success("C3", "Armei os sinais");
+    success("C3", "Armei sinais");
     debug("C3", ">");
     return 0;
 }
@@ -177,7 +179,7 @@ int escrevePedido(Passagem dados) {
         }
         else{
         fclose(fifo);
-        success("C4", "Escrevi no FIFO");
+        success("C4", "Escrevi FIFO");
         }
     }
     debug("C4", ">");
@@ -195,7 +197,7 @@ int escrevePedido(Passagem dados) {
 int configuraTemporizador() {
     debug("C5", "<");
     alarm(MAX_ESPERA);
-    success("C5", "Inicia Espera de %d segundos", MAX_ESPERA);
+    success("C5", "Inicia espera de %d segundos", MAX_ESPERA);
     pause();
     return 0;
     debug("C5", ">");

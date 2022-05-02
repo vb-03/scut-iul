@@ -258,8 +258,10 @@ Passagem lePedido(){
  */
 int validaPedido(Passagem pedido){
     debug("S7", "<");
+    char tipoNomePassagem[20];
     if (1 < pedido.tipo_passagem && pedido.tipo_passagem > 2){
         error("S7", "Tipo de passagem inválida");
+        kill(pedido.pid_cliente, SIGHUP);
         stats.contadorAnomalias++;
         return -1;
     }
@@ -278,7 +280,6 @@ int validaPedido(Passagem pedido){
                 return -1;
             }
             else{
-                char tipoNomePassagem[20];
                 if(pedido.tipo_passagem == 1){
                 char tipoNomePassagem[20] = "Normal";
             }
@@ -408,7 +409,7 @@ int validaPedido(Passagem pedido){
         //S10.4
         FILE* st = fopen(FILE_STATS,"wb");
         if(st == NULL){
-            error("S10.4","Erro ao abrir o ficheiro %s",FILE_STATS);
+            error("S10.4","Erro ao abrir o ficheiro %s", FILE_STATS);
         }
         else{
             if(fwrite(&stats, sizeof(stats), 1, st) < 1){

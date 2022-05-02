@@ -446,7 +446,7 @@ int validaPedido(Passagem pedido){
             if(lista_passagens[i].pid_cliente == pidCancelRequest){
                 success("S11.2", "Cancelamento %d", lista_passagens[i].pid_servidor_dedicado);
                 pidServDed = lista_passagens[i].pid_servidor_dedicado;
-                //stats.contadorAnomalias++;
+                stats.contadorAnomalias++;
                 apagaEntradaBD(lista_passagens,i);
                 break;
             } else { 
@@ -455,7 +455,7 @@ int validaPedido(Passagem pedido){
             }
         }
         kill(pidServDed, SIGTERM);
-        success("S11.3", "Sinal de Cancelamento enviado ao Shutdown Servidor Dedicado");
+        success("S11.3", "Sinal de Cancelamento enviado ao Servidor Dedicado");
 
         debug("S11", ">");
     }

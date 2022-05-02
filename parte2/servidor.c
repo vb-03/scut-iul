@@ -315,7 +315,7 @@ int validaPedido(Passagem pedido){
      */
     int reservaEntradaBD(Passagem* bd, Passagem pedido) {
         debug("S8", "<");
-        int listIndex = -1;
+        int  = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
                 listIndex = i;
@@ -333,7 +333,7 @@ int validaPedido(Passagem pedido){
             error("S8","Lista de Passagens cheia");
             stats.contadorAnomalias++;
             kill(pedido.pid_cliente, SIGHUP);
-            return -1;
+            return listIndex;
             }
         }
         debug("S8", ">");

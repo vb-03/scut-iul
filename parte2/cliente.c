@@ -3,9 +3,9 @@
  **
  ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
  ** Nome do Módulo: cliente.c v1
- ** Descrição/Explicação do Módulo: 
- **
- **
+ ** Descrição/Explicação do Módulo: Este programa irá receber o input por parte do cliente
+ ** e enviar toda a informação para o servidor, aguardando resposta do servidor para informar
+ ** o cliente do estado do pedido.
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"

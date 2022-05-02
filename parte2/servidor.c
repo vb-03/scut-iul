@@ -261,8 +261,8 @@ int validaPedido(Passagem pedido){
     char tipoNomePassagem[20];
     if (pedido.tipo_passagem < 1 || pedido.tipo_passagem > 2){
         error("S7", "Tipo de passagem inválida");
-        kill(pedido.pid_cliente, SIGHUP);
         stats.contadorAnomalias++;
+        kill(pedido.pid_cliente, SIGHUP);
         return -1;
     }
     else {

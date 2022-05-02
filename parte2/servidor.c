@@ -317,6 +317,7 @@ int validaPedido(Passagem pedido){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
                 indice_lista = i;
                 //bd[i].tipo_passagem = pedido.tipo_passagem;
+                bd[i]=pedido;
                 if(pedido.tipo_passagem == 1){
                     stats.contadorNormal++;
                 }

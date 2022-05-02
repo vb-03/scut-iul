@@ -451,7 +451,7 @@ int validaPedido(Passagem pedido){
                 break;
             } else { 
                 error("S11.2", "Não encontrei a passagem correspondente");
-                stats.contadorAnomalias++; 
+                //stats.contadorAnomalias++; 
             }
         }
         kill(pidServDed, SIGTERM);

@@ -106,18 +106,18 @@ Passagem getDadosPedidoUtilizador() {
         my_fgets(getTipo,10,stdin);
         p.tipo_passagem = atoi(getTipo);
         
-        if((1 < p.tipo_passagem && p.tipo_passagem > 2)){
-            error("C2", "Tipo Inválido");
-            kill(p.pid_cliente, SIGKILL);
-        }
-        else{
+//        if((1 < p.tipo_passagem && p.tipo_passagem > 2)){
+//            error("C2", "Tipo Inválido");
+//            kill(p.pid_cliente, SIGKILL);
+//        }
+//        else{
             if(p.tipo_passagem == 1){
                 char tipoNomePassagem[20] = "Normal";
             }
             if(p.tipo_passagem == 2){
                 char tipoNomePassagem[20] = "Via Verde";
             }
-        }
+//       }
 
         printf("Insira a matrícula: \n");
         my_fgets(p.matricula,9,stdin);

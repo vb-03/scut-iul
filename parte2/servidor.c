@@ -258,7 +258,7 @@ Passagem lePedido(){
  */
 int validaPedido(Passagem pedido){
     debug("S7", "<");
-    if (pedido.tipo_passagem != 1 && pedido.tipo_passagem != 2){
+    if (1 < pedido.tipo_passagem && pedido.tipo_passagem > 2){
         error("S7", "Tipo de passagem inválida");
         stats.contadorAnomalias++;
         return -1;
@@ -267,12 +267,14 @@ int validaPedido(Passagem pedido){
         if (pedido.matricula == NULL){
             error("S7", "Matrícula inválida");
             stats.contadorAnomalias++;
+            kill(pedido.pid_cliente,SIGHUP);
             return -1;
         }
         else{
             if (pedido.lanco == NULL){
                 error("S7", "Lanço inválida");
                 stats.contadorAnomalias++;
+                kill(pedido.pid_cliente,SIGHUP);
                 return -1;
             }
             else{
@@ -442,11 +444,13 @@ int validaPedido(Passagem pedido){
             if(lista_passagens[i].pid_cliente == pidCancelRequest){
             success("S11.2", "Cancelamento %d", lista_passagens[i].pid_servidor_dedicado);
             kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
+            stats.contadorAnomalias++;
             success("S11.3", "Cancelamento Shutdown Servidor Dedicado");
             return;
                 }
             if(i = NUM_PASSAGENS - 1) { 
-            error("S11.2", "Não encontrei a passagem correspondente"); 
+            error("S11.2", "Não encontrei a passagem correspondente");
+            stats.contadorAnomalias++; 
                     }
                 }
         debug("S11", ">");

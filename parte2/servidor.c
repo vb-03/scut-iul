@@ -315,7 +315,7 @@ int validaPedido(Passagem pedido){
      */
     int reservaEntradaBD(Passagem* bd, Passagem pedido) {
         debug("S8", "<");
-        int  = -1;
+        int listIndex = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
                 listIndex = i;

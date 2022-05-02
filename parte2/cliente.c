@@ -198,7 +198,7 @@ int configuraTemporizador() {
     debug("C5", "<");
     alarm(MAX_ESPERA);
     success("C5", "Inicia espera de %d segundos", MAX_ESPERA);
-    pause();
+    //pause();
     return 0;
     debug("C5", ">");
 

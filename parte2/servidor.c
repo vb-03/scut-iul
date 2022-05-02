@@ -288,12 +288,12 @@ int validaPedido(Passagem pedido){
                 else{            
                     if(pedido.tipo_passagem == 1){
                         //char tipoNomePassagem[20] = "Normal";
-                        success("S7", "Chegou novo pedido do tipo Normal solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", pedido.matricula, pedido.lanco, pedido.pid_cliente);
+                        success("S7", "Chegou novo pedido de passagem do tipo Normal solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", pedido.matricula, pedido.lanco, pedido.pid_cliente);
 
                         }
                     if(pedido.tipo_passagem == 2){
                         //char tipoNomePassagem[20] = "Via Verde";
-                        success("S7", "Chegou novo pedido do tipo Via Verde solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", pedido.matricula, pedido.lanco, pedido.pid_cliente);
+                        success("S7", "Chegou novo pedido de passagem do tipo Via Verde solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", pedido.matricula, pedido.lanco, pedido.pid_cliente);
 
                     }
                 }
@@ -313,21 +313,18 @@ int validaPedido(Passagem pedido){
      *
      * @return int Em caso de sucesso, retorna o índice da lista preenchido. Caso contrário retorna -1
      */
-    int reservaEntradaBD(Passagem * bd, Passagem pedido) {
+    int reservaEntradaBD(Passagem* bd, Passagem pedido) {
         debug("S8", "<");
         int indice_lista = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
                 indice_lista = i;
-                //bd[i].tipo_passagem = pedido.tipo_passagem;
                 bd[i]=pedido;
                 if(pedido.tipo_passagem == 1){
                     stats.contadorNormal++;
-                }
-                if(pedido.tipo_passagem == 2){
+                }else if(pedido.tipo_passagem == 2){
                     stats.contadorViaVerde++;
-                }
-                //indice_lista = i;
+                    }
                 success("S8","Entrada %d preenchida",indice_lista);
                 return indice_lista;
              }

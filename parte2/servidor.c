@@ -188,11 +188,11 @@ int criaFicheiroServidor() {
 int criaFifo() {
     debug("S4", "<");
     int verfifo = mkfifo(FILE_PEDIDOS,0666);
-    if(verfifo > 0){
-        success("S4", "Criei FIFO");
+    if(verfifo < 0){
+        error("S4", "Erro na criação do FIFO %s",FILE_PEDIDOS);
     }
     else{
-        error("S4", "Erro na criação do FIFO %s",FILE_PEDIDOS);
+        success("S4", "Criei FIFO");
     }
     debug("S4", ">");
     return 0;

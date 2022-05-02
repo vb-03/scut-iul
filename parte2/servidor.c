@@ -280,19 +280,19 @@ int validaPedido(Passagem pedido){
                 return -1;
             }
             else{
-                if(pedido.pid_cliente == NULL || strcmp(pedido.pid_cliente,"")==0 ){
-                    error("S7", "Lanço inválida");
-                    stats.contadorAnomalias++;
-                    kill(pedido.pid_cliente,SIGHUP);
-                    return -1;
+                if(pedido.pid_cliente <= 0){
+                error("S7", "PID Inválido");
+                stats.contadorAnomalias++;
+                kill(pedido.pid_cliente,SIGHUP);
+                return -1;
                 }
-                else{
-                if(pedido.tipo_passagem == 1){
-                char tipoNomePassagem[20] = "Normal";
-            }
-                if(pedido.tipo_passagem == 2){
-                char tipoNomePassagem[20] = "Via Verde";
-            }
+                else{            
+                    if(pedido.tipo_passagem == 1){
+                    char tipoNomePassagem[20] = "Normal";
+                        }
+                    if(pedido.tipo_passagem == 2){
+                    char tipoNomePassagem[20] = "Via Verde";
+                        }
                 success("S7", "Chegou novo pedido do tipo %s solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem, pedido.matricula, pedido.lanco, pedido.pid_cliente);
                 }
             }

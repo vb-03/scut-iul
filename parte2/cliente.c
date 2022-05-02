@@ -70,10 +70,10 @@ int getPidServidor(){
     debug("C1", "<");
     char gPID[10];
     int pidClient = getpid();
-    FILE* socrates;
-    socrates = fopen(FILE_SERVIDOR, "r");
-    if (socrates != NULL && my_fgets(gPID, 10, socrates) != NULL){
-        my_fgets(gPID, 10, socrates);
+    FILE* PIDs;
+    PIDs = fopen(FILE_SERVIDOR, "r");
+    if (PIDs != NULL && my_fgets(gPID, 10, PIDs) != NULL){
+        my_fgets(gPID, 10, PIDs);
         pidServidor = atoi(gPID);
         success("C1", "PID Servidor: %d", pidServidor);
     }
@@ -81,7 +81,7 @@ int getPidServidor(){
         error("C1", "O ficheiro %s não existe ou não existe um PID registado no ficheiro", FILE_SERVIDOR);
         kill(pidClient, SIGKILL);
     }
-    fclose(socrates);
+    fclose(PIDs);
     debug("C1", ">");
     return pidServidor;
 }

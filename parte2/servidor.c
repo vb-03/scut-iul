@@ -446,7 +446,7 @@ int validaPedido(Passagem pedido){
             success("S11.2", "Cancelamento %d", lista_passagens[i].pid_servidor_dedicado);
             kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
             stats.contadorAnomalias++;
-            success("S11.3", "Cancelamento Shutdown Servidor Dedicado");
+            success("S11.3", "Sinal de Cancelamento Shutdown Servidor Dedicado");
             return;
                 }
             if(i = NUM_PASSAGENS - 1) { 

@@ -259,7 +259,7 @@ Passagem lePedido(){
 int validaPedido(Passagem pedido){
     debug("S7", "<");
     char tipoNomePassagem[20];
-    if (1 < pedido.tipo_passagem && pedido.tipo_passagem > 2){
+    if (pedido.tipo_passagem < 1 || pedido.tipo_passagem > 2){
         error("S7", "Tipo de passagem inválida");
         kill(pedido.pid_cliente, SIGHUP);
         stats.contadorAnomalias++;

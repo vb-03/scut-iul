@@ -333,11 +333,11 @@ int validaPedido(Passagem pedido){
             error("S8","Lista de Passagens cheia");
             stats.contadorAnomalias++;
             kill(pedido.pid_cliente, SIGHUP);
-            return listIndex;
+            return -1;
             }
         }
         debug("S8", ">");
-        return indice_lista;
+        return listIndex;
     }
 
     /**

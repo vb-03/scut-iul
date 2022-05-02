@@ -325,7 +325,7 @@ int validaPedido(Passagem pedido){
                 }else if(pedido.tipo_passagem == 2){
                     stats.contadorViaVerde++;
                     }
-                success("S8","Entrada %d preenchida",indice_lista);
+                success("S8","Entrada %d preenchida",listIndex);
                 return listIndex;
              }
             // return indice_lista;

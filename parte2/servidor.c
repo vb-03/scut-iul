@@ -317,7 +317,7 @@ int validaPedido(Passagem pedido){
         debug("S8", "<");
         int listIndex = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
-            if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
+            if(bd[i].tipo_passagem == -1){ 
                 listIndex = i;
                 bd[i]=pedido;
                 if(pedido.tipo_passagem == 1){
@@ -334,7 +334,6 @@ int validaPedido(Passagem pedido){
             kill(pedido.pid_cliente, SIGHUP);
             return -1;
         debug("S8", ">");
-        return listIndex;
     }
 
     /**

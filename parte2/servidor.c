@@ -259,7 +259,6 @@ Passagem lePedido(){
 int validaPedido(Passagem pedido){
     debug("S7", "<");
     char tipoNomePassagem[20];
-    char empty[5] = "";
     if (pedido.tipo_passagem < 1 || pedido.tipo_passagem > 2){
         error("S7", "Tipo de passagem inválida");
         stats.contadorAnomalias++;
@@ -267,14 +266,14 @@ int validaPedido(Passagem pedido){
         return -1;
     }
     else {
-        if (pedido.matricula == NULL || strcmp(pedido.matricula,empty)==0 ){ //Tenho que fazer o strcmp???? em branco? lmao ""
+        if (pedido.matricula == NULL || strcmp(pedido.matricula,"")==0 ){ //Tenho que fazer o strcmp???? em branco? lmao ""
             error("S7", "Matrícula inválida");
             stats.contadorAnomalias++;
             kill(pedido.pid_cliente,SIGHUP);
             return -1;
         }
         else{
-            if (pedido.lanco == NULL || strcmp(pedido.matricula,empty)==0 ){
+            if (pedido.lanco == NULL || strcmp(pedido.lanco,"")==0 ){
                 error("S7", "Lanço inválida");
                 stats.contadorAnomalias++;
                 kill(pedido.pid_cliente,SIGHUP);

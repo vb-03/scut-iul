@@ -328,14 +328,11 @@ int validaPedido(Passagem pedido){
                 success("S8","Entrada %d preenchida",listIndex);
                 return listIndex;
              }
-            // return indice_lista;
-            else{
+        }
             error("S8","Lista de Passagens cheia");
             stats.contadorAnomalias++;
             kill(pedido.pid_cliente, SIGHUP);
             return -1;
-            }
-        }
         debug("S8", ">");
         return listIndex;
     }

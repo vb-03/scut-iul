@@ -287,12 +287,15 @@ int validaPedido(Passagem pedido){
                 }
                 else{            
                     if(pedido.tipo_passagem == 1){
-                    char tipoNomePassagem[20] = "Normal";
+                        //char tipoNomePassagem[20] = "Normal";
+                        success("S7", "Chegou novo pedido do tipo Normal solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", pedido.matricula, pedido.lanco, pedido.pid_cliente);
+
                         }
                     if(pedido.tipo_passagem == 2){
-                    char tipoNomePassagem[20] = "Via Verde";
+                        //char tipoNomePassagem[20] = "Via Verde";
+                        success("S7", "Chegou novo pedido do tipo Via Verde solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", pedido.matricula, pedido.lanco, pedido.pid_cliente);
+
                     }
-                success("S7", "Chegou novo pedido do tipo %s solicitado pela viatura com a matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem, pedido.matricula, pedido.lanco, pedido.pid_cliente);
                 }
             }
         }

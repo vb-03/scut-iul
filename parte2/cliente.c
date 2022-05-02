@@ -99,35 +99,27 @@ Passagem getDadosPedidoUtilizador() {
     Passagem p;
     p.tipo_passagem = -1;   // Por omissão, retorna valor inválido
     p.pid_cliente = getpid();
-    char tipoNomePassagem[20];
+    //char tipoNomePassagem[20];
 
         printf("Qual o tipo de portagem? \n 1 - Normal \n 2 - Via Verde \n");
         char getTipo[20];
         my_fgets(getTipo,10,stdin);
         p.tipo_passagem = atoi(getTipo);
         
-       /* if((1 < p.tipo_passagem && p.tipo_passagem > 2)){
-            error("C2", "Tipo Inválido");
-            kill(p.pid_cliente, SIGKILL);
-        }
-        else{ */
-        if(p.tipo_passagem == 1){
-                char tipoNomePassagem[20] = "Normal";
-               // tipoNomePassagem[ strlen(tipoNomePassagem)-1 ] = '\0';
-            }
-        if(p.tipo_passagem == 2){
-                char tipoNomePassagem[20] = "Via Verde";
-                // tipoNomePassagem[ strlen(tipoNomePassagem)-1 ] = '\0';
-            }
-       //}
-
         printf("Insira a matrícula: \n");
         my_fgets(p.matricula,9,stdin);
                 
         printf("Insira o lanço: \n");
         my_fgets(p.lanco,50,stdin);
 
-    success("C2", "Passagem do tipo %s solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", tipoNomePassagem, p.matricula,p.lanco,p.pid_cliente);
+        if(p.tipo_passagem == 1){
+               // char tipoNomePassagem[20] = "Normal";
+               success("C2", "Passagem do tipo Normal solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", p.matricula,p.lanco,p.pid_cliente);
+            }
+        if(p.tipo_passagem == 2){
+                //char tipoNomePassagem[20] = "Via Verde";
+                success("C2", "Passagem do tipo Via Verde solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", p.matricula,p.lanco,p.pid_cliente);  
+            }
     debug("C2", ">");
     return p;
 }

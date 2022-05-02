@@ -441,19 +441,23 @@ int validaPedido(Passagem pedido){
         success("S11", "Cancel");
         int pidCancelRequest = info->si_pid;
         success("S11.1", "Cancelamento enviado pelo Processo %d", pidCancelRequest);
+        int pidServDed;
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(lista_passagens[i].pid_cliente == pidCancelRequest){
-            success("S11.2", "Cancelamento %d", lista_passagens[i].pid_servidor_dedicado);
-            kill(lista_passagens[i].pid_servidor_dedicado, SIGTERM);
-            stats.contadorAnomalias++;
-            success("S11.3", "Sinal de Cancelamento Shutdown Servidor Dedicado");
-            return;
-                }
-            if(i = NUM_PASSAGENS - 1) { 
-            error("S11.2", "Não encontrei a passagem correspondente");
-            stats.contadorAnomalias++; 
-                    }
-                }
+                success("S11.2", "Cancelamento %d", lista_passagens[i].pid_servidor_dedicado);
+                pidServDed = lista_passagens[i].pid_servidor_dedicado;
+                stats.contadorAnomalias++;
+
+                apagaEntradaBD(lista_passagens,i);
+                break;
+            } else { 
+                error("S11.2", "Não encontrei a passagem correspondente");
+                stats.contadorAnomalias++; 
+            }
+        }
+        kill(pidServDed, SIGTERM);
+        success("S11.3", "Sinal de Cancelamento Shutdown Servidor Dedicado");
+
         debug("S11", ">");
     }
 

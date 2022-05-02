@@ -234,7 +234,11 @@ Passagem lePedido(){
         fclose(fifo);
     }
     else{
+        if (EINTR == errno) 
+        success("S6", "Fui interrompido por um sinal, mas está tudo bem e vou voltar a ficar à espera do comando");
+        else{
         error("S6", "O ficheiro FIFO %s não existe", FILE_PEDIDOS);
+        }
     }
      //TEM QUE FICAR FORA
     debug("S6", ">");
@@ -313,12 +317,14 @@ int validaPedido(Passagem pedido){
                 success("S8","Entrada %d preenchida",indice_lista);
                 return indice_lista;
              }
-             return indice_lista;
-        }
+            // return indice_lista;
+            else{
             error("S8","Lista de Passagens cheia");
             stats.contadorAnomalias++;
             kill(pedido.pid_cliente, SIGHUP);
             return -1;
+            }
+        }
         debug("S8", ">");
         return indice_lista;
     }
@@ -430,7 +436,6 @@ int validaPedido(Passagem pedido){
     void trataSinalSIGHUP(int sinalRecebido, siginfo_t *info, void *uap){
         debug("S11", "<");
         success("S11", "Cancel");
-        //S11.1
         int pidCancelRequest = info->si_pid;
         success("S11.1", "Cancelamento enviado pelo Processo %d", pidCancelRequest);
         for(int i = 0; i < NUM_PASSAGENS; i++){
@@ -468,7 +473,10 @@ int validaPedido(Passagem pedido){
                 success("S12.2", "Entrada Eliminada");
                 return;
             }
+            if(i = NUM_PASSAGENS - 1) { 
             error("S12.2", "Não encontrei a passagem correspondente");
+            return;
+            }
         }
             success("S12.1", "Terminou Servidor Dedicado %d", pidFilho);
             debug("S12", ">");
@@ -527,8 +535,7 @@ int validaPedido(Passagem pedido){
      *
      * @return int Sucesso
      */
-    int sd_terminaProcessamento(Passagem pedido)
-    {
+    int sd_terminaProcessamento(Passagem pedido){
         debug("SD16", "<");
         int pidFilho = getpid();
         kill(pedido.pid_cliente, SIGTERM);

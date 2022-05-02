@@ -211,7 +211,6 @@ void trataSinalSIGUSR1(int sinalRecebido) {
     debug("C6", "<");
     success("C6","Passagem Iniciada");
     passagemIniciada = TRUE; 
-    return;
     debug("C6", ">");
 }
 
@@ -225,11 +224,11 @@ void trataSinalSIGUSR1(int sinalRecebido) {
 void trataSinalSIGTERM(int sinalRecebido) {
     debug("C7", "<");
     int pidClient = getpid();
-        if(passagemIniciada == TRUE){
+        if(passagemIniciada = TRUE){
             success("C7", "Passagem Concluída");
             exit(1);
-
-        }else{
+        }
+        else{
             error("C7", "O sinal SIGUSR1 não foi passado ao cliente");
             exit(1);
         }

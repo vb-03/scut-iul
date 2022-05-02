@@ -267,14 +267,14 @@ int validaPedido(Passagem pedido){
         return -1;
     }
     else {
-        if (pedido.matricula == NULL || strcmp(pedido.matricula,empty) ){ //Tenho que fazer o strcmp???? em branco? lmao ""
+        if (pedido.matricula == NULL || strcmp(pedido.matricula,empty)==0 ){ //Tenho que fazer o strcmp???? em branco? lmao ""
             error("S7", "Matrícula inválida");
             stats.contadorAnomalias++;
             kill(pedido.pid_cliente,SIGHUP);
             return -1;
         }
         else{
-            if (pedido.lanco == NULL || strcmp(pedido.matricula,empty)){
+            if (pedido.lanco == NULL || strcmp(pedido.matricula,empty)==0 ){
                 error("S7", "Lanço inválida");
                 stats.contadorAnomalias++;
                 kill(pedido.pid_cliente,SIGHUP);

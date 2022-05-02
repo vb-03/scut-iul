@@ -362,7 +362,7 @@ int validaPedido(Passagem pedido){
         if(pidFilho !=0){
             bd[indiceLista].pid_servidor_dedicado = pidFilho;
             success("S9","Criado Servidor Dedicado com PID %d", pidFilho);
-            return -1;
+            return 1;
         }
         debug("S9", ">");
         return pidFilho;

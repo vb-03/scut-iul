@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#define DEBUG_MODE FALSE                         // To disable debug messages, uncomment this line
+// #define DEBUG_MODE FALSE                         // To disable debug messages, uncomment this line
 
 
 /* Variáveis globais */
@@ -258,7 +258,7 @@ Passagem lePedido(){
  */
 int validaPedido(Passagem pedido){
     debug("S7", "<");
-    char tipoNomePassagem[20];
+    //char tipoNomePassagem[20];
     if (pedido.tipo_passagem < 1 || pedido.tipo_passagem > 2){
         error("S7", "Tipo de passagem inválida");
         stats.contadorAnomalias++;
@@ -386,7 +386,6 @@ int validaPedido(Passagem pedido){
      */
     void trataSinalSIGINT(int sinalRecebido){
         debug("S10", "<");
-        int pidServer = getpid();
         success("S10", "Shutdown Servidor");
         //S10.1
         for(int i = 0; i < NUM_PASSAGENS; i++){
@@ -562,7 +561,6 @@ int validaPedido(Passagem pedido){
      */
     void sd_trataSinalSIGTERM(int sinalRecebido){
         debug("SD17", "<");
-        int pidFilho = getpid();
         kill(pedido.pid_cliente, SIGHUP);
         success("SD17", "Processamento Cancelado");
         exit(0);

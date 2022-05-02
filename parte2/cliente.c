@@ -217,7 +217,6 @@ void trataSinalSIGUSR1(int sinalRecebido) {
  */
 void trataSinalSIGTERM(int sinalRecebido) {
     debug("C7", "<");
-    int pidClient = getpid();
         if(passagemIniciada == TRUE){
             success("C7", "Passagem Concluída");
             exit(0);
@@ -236,7 +235,6 @@ void trataSinalSIGTERM(int sinalRecebido) {
  */
 void trataSinalSIGHUP(int sinalRecebido) {
     debug("C8", "<");
-    int pidClient = getpid();
     success("C8", "Processo Não Concluído e Incompleto");
     exit(0);
     debug("C8", ">");

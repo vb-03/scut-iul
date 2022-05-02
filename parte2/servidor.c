@@ -283,7 +283,6 @@ int validaPedido(Passagem pedido){
                 if(pedido.pid_cliente <= 0){
                 error("S7", "PID Inválido");
                 stats.contadorAnomalias++;
-                //kill(pedido.pid_cliente,SIGHUP);
                 return -1;
                 }
                 else{            
@@ -316,15 +315,15 @@ int validaPedido(Passagem pedido){
         int indice_lista = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
-                bd[i] = pedido;
-                bd[i].tipo_passagem = pedido.tipo_passagem;
+                indice_lista = i;
+                //bd[i].tipo_passagem = pedido.tipo_passagem;
                 if(pedido.tipo_passagem == 1){
                     stats.contadorNormal++;
                 }
                 if(pedido.tipo_passagem == 2){
                     stats.contadorViaVerde++;
                 }
-                indice_lista = i;
+                //indice_lista = i;
                 success("S8","Entrada %d preenchida",indice_lista);
                 return indice_lista;
              }

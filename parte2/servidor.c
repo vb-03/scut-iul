@@ -315,10 +315,10 @@ int validaPedido(Passagem pedido){
      */
     int reservaEntradaBD(Passagem* bd, Passagem pedido) {
         debug("S8", "<");
-        int indice_lista = -1;
+        int listIndex = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(bd[i].tipo_passagem == -1){ //Mas é no 1o vazio e depois breako com o return
-                indice_lista = i;
+                listIndex = i;
                 bd[i]=pedido;
                 if(pedido.tipo_passagem == 1){
                     stats.contadorNormal++;
@@ -326,7 +326,7 @@ int validaPedido(Passagem pedido){
                     stats.contadorViaVerde++;
                     }
                 success("S8","Entrada %d preenchida",indice_lista);
-                return indice_lista;
+                return listIndex;
              }
             // return indice_lista;
             else{

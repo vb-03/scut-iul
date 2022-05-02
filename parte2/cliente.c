@@ -229,13 +229,14 @@ void trataSinalSIGTERM(int sinalRecebido) {
         if(passagemIniciada = TRUE){
             success("C7", "Passagem Concluída");
             exit(0);
+        }
         else{
             error("C7", "O sinal SIGUSR1 não foi passado ao cliente");
             exit(-1);   
         }     
     debug("C7", ">");
 }
-}
+
 
 /**
  * C8   O sinal armado SIGHUP serve para o Servidor Dedicado indicar que o processamento a passagem não foi concluído.

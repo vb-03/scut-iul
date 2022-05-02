@@ -171,7 +171,7 @@ int criaFicheiroServidor() {
                 kill(pidServer, SIGKILL);
                          }
             else{
-                success("S3", "PID Server: %d", pidServer);
+                success("S3", "%d", pidServer);
             }
        }
        
@@ -188,7 +188,7 @@ int criaFicheiroServidor() {
 int criaFifo() {
     debug("S4", "<");
     int verfifo = mkfifo(FILE_PEDIDOS,0666);
-    if(verfifo < 0){
+    if(verfifo > 0){
         success("S4", "Criei FIFO");
     }
     else{
@@ -545,7 +545,7 @@ int validaPedido(Passagem pedido){
         int pidFilho = getpid();
         kill(pedido.pid_cliente, SIGTERM);
         success("SD16", "Fim Passagem %d %d", pedido.pid_cliente, pidFilho);
-        kill(pidFilho, SIGKILL);
+        exit(0);
         debug("SD16", ">");
         return 0;
     }
@@ -560,6 +560,6 @@ int validaPedido(Passagem pedido){
         int pidFilho = getpid();
         kill(pedido.pid_cliente, SIGHUP);
         success("SD17", "Processamento Cancelado");
-        kill(pidFilho, SIGKILL);
+        exit(0);
         debug("SD17", ">");
     }

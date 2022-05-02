@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#######
+
 ##########################################################################
 # ISCTE-IUL: 1.º - Trabalho prático de Sistemas Operativos 2021/2022
 #

@@ -517,7 +517,7 @@ int validaPedido(Passagem pedido){
         debug("SD14", "<");
         int pidFilho = getpid();
         kill(pedido.pid_cliente, SIGUSR1);
-        success("SD14", "Início de Passagem %d %d", pedido.pid_cliente, pidFilho);
+        success("SD14", "Início Passagem %d %d", pedido.pid_cliente, pidFilho);
         debug("SD14", ">");
         return 0;
     }
@@ -531,7 +531,7 @@ int validaPedido(Passagem pedido){
     int sd_sleepRandomTime(){
         debug("SD15", "<");
         int aleatorio = (my_rand() % (MAX_PROCESSAMENTO - MIN_PROCESSAMENTO + 1)) + MIN_PROCESSAMENTO;
-        success("SD15", "%d", aleatorio);
+        success("SD15", "Sleeping %d", aleatorio);
         sleep(aleatorio);
         debug("SD15", ">");
         return 0;

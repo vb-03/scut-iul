@@ -69,12 +69,13 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
 int getPidServidor(){
     debug("C1", "<");
     char gPID[10];
+    int svPID;
     //int pidClient = getpid();
     FILE* PIDs = fopen(FILE_SERVIDOR, "r");
     if (PIDs != NULL && my_fgets(gPID, 10, PIDs) != NULL){
         my_fgets(gPID, 10, PIDs);
-        pidServidor = atoi(gPID);
-        success("C1", "PID Servidor: %d", pidServidor);
+        svPID = atoi(gPID);
+        success("C1", "PID Servidor: %d", svPID);
         fclose(PIDs);
     }
     else{

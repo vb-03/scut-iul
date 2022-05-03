@@ -75,7 +75,7 @@ int getPidServidor(){
     if (PIDs != NULL || my_fgets(gPID, 10, PIDs) != NULL){
         //my_fgets(gPID, 10, PIDs);
         pidServidor = atoi(gPID);
-        success("C1", "PID Servidor: %d", svPID);
+        success("C1", "PID Servidor: %d", pidServidor);
         fclose(PIDs);
     }
     else{

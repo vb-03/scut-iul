@@ -69,18 +69,18 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
 int getPidServidor(){
     debug("C1", "<");
     char gPID[10];
-    int svPID;
-    //int pidClient = getpid();
+    //int svPID;
+    int pidClient = getpid();
     FILE* PIDs = fopen(FILE_SERVIDOR, "r");
-    if (PIDs != NULL && my_fgets(gPID, 10, PIDs) != NULL){
-        my_fgets(gPID, 10, PIDs);
-        svPID = atoi(gPID);
+    if (PIDs != NULL || my_fgets(gPID, 10, PIDs) != NULL){
+        //my_fgets(gPID, 10, PIDs);
+        pidServidor = atoi(gPID);
         success("C1", "PID Servidor: %d", svPID);
         fclose(PIDs);
     }
     else{
         error("C1", "O ficheiro %s não existe ou não existe um PID registado no ficheiro", FILE_SERVIDOR);
-        return -1;
+        kill(pidClient, SIGKILL);
     }
     debug("C1", ">");
     return pidServidor;

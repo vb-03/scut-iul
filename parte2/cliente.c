@@ -69,7 +69,6 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
 int getPidServidor(){
     debug("C1", "<");
     char gPID[20];
-    int pidClient = getpid();
     FILE* PIDs;
     PIDs = fopen(FILE_SERVIDOR, "r");
     if (PIDs == NULL){
@@ -166,7 +165,6 @@ int armaSinais() {
  */
 int escrevePedido(Passagem dados) {
     debug("C4", "<");
-    int pidClient = getpid();
     // Valida se o ficheiro existe.
     int fileCheck = access(FILE_PEDIDOS, F_OK);
     if(fileCheck != 0){

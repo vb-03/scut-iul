@@ -161,7 +161,7 @@ int criaFicheiroServidor() {
     FILE* pSV = fopen(FILE_SERVIDOR,"w");
     if(pSV == NULL){
         error("S3","Não foi possível criar o ficheiro");
-        //kill(pidServer, SIGKILL);
+        return -1;
     }
     else{
            fprintf(pSV, "%d", pidServer);
@@ -170,8 +170,8 @@ int criaFicheiroServidor() {
            pSV = fopen(FILE_SERVIDOR,"r");
             if (my_fgets(checkEmpty, 20, pSV) == NULL){
                 error("S3", "O ficheiro %s não existe ou não foi criado", FILE_SERVIDOR);
-                kill(pidServer, SIGKILL);
-                         }
+                return -1;
+            }
             else{
                 success("S3", "%d", pidServer);
             }
@@ -226,7 +226,7 @@ int armaSinais() {
  * @return Passagem Elemento com os dados preenchidos. Se tipo_passagem = -1, significa que o elemento é imválido
  */
 Passagem lePedido(){
-    debug("S6", "<");
+    debug("S6", "<"); 
     Passagem p;
     p.tipo_passagem = -1; // Por omissão, retorna valor inválido
     FILE *fifo = fopen(FILE_PEDIDOS, "rb");
@@ -236,13 +236,17 @@ Passagem lePedido(){
         fclose(fifo);
     }
     else{
-        if (EINTR == errno) 
-        success("S6", "Fui interrompido por um sinal, mas está tudo bem e vou voltar a ficar à espera do comando");
-        else{
         error("S6", "O ficheiro FIFO %s não existe", FILE_PEDIDOS);
-        }
+        p.tipo_passagem = -1;
     }
-     //TEM QUE FICAR FORA
+    if(EINTR == errno){
+        success("S6", "Fui interrompido por um sinal, mas está tudo bem e vou voltar a ficar à espera do comando");
+        p.tipo_passagem = -1;
+        }
+    else if(p.tipo_passagem != 1 && p.tipo_passagem != 2){
+        error("S6", "Tipo de passagem inválida");
+        p.tipo_passagem = -1;
+    }
     debug("S6", ">");
     return p;
 }

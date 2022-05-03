@@ -161,7 +161,7 @@ int criaFicheiroServidor() {
     FILE* pSV = fopen(FILE_SERVIDOR,"w");
     if(pSV == NULL){
         error("S3","Não foi possível criar o ficheiro");
-        kill(pidServer, SIGKILL);
+        //kill(pidServer, SIGKILL);
     }
     else{
            fprintf(pSV, "%d", pidServer);

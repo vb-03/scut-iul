@@ -68,23 +68,30 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
  */
 int getPidServidor(){
     debug("C1", "<");
-    char gPID[10];
+    char gPID[20];
     int pidClient = getpid();
-    int test = access(FILE_SERVIDOR, F_OK);
-    if (test == 0){
-        FILE* PIDs = fopen(FILE_SERVIDOR, "r");
-        pidServidor(atoi(my_fgets(gPID, 10, PIDs)));
-        //pidServidor = atoi(gPID);
-        success("C1", "PID Servidor: %d", pidServidor);
-        fclose(PIDs);
-        return pidServidor;
-    }
-    else{
+    FILE* PIDs;
+    PIDs = fopen(FILE_SERVIDOR, "r");
+    if (PIDs == NULL){
         error("C1", "O ficheiro %s não existe ou não existe um PID registado no ficheiro", FILE_SERVIDOR);
         return -1;
     }
+    else if(my_fgets(gPID, 20, PIDs) == NULL){
+        error("C1", "O ficheiro %s não existe ou não existe um PID registado no ficheiro", FILE_SERVIDOR);
+        return -1;
+        }
+    else if(atoi(gPID) <= 0){
+    error("C1", "O ficheiro %s não existe ou não existe um PID registado no ficheiro", FILE_SERVIDOR);
+        return -1;
+    }
+    else{
+        my_fgets(gPID, 20, PIDs);
+        pidServidor = atoi(gPID);
+        success("C1", "PID Servidor: %d", pidServidor);
+        fclose(PIDs);
+    }
     debug("C1", ">");
-
+    return pidServidor;
 }
 
 /**
@@ -117,10 +124,13 @@ Passagem getDadosPedidoUtilizador() {
                // char tipoNomePassagem[20] = "Normal";
                success("C2", "Passagem do tipo Normal solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", p.matricula,p.lanco,p.pid_cliente);
             }
-        if(p.tipo_passagem == 2){
+        else if(p.tipo_passagem == 2){
                 //char tipoNomePassagem[20] = "Via Verde";
                 success("C2", "Passagem do tipo Via Verde solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", p.matricula,p.lanco,p.pid_cliente);  
             }
+        else{
+                error("C2", "Tipo de passagem inválido");
+        }
     debug("C2", ">");
     return p;
 }
@@ -162,7 +172,6 @@ int escrevePedido(Passagem dados) {
         error("C4","O ficheiro não existe");
         kill(pidClient, SIGKILL);
     }
-    
     // escreve informações (em formato binário) nesse FIFO.
     else{ 
         FILE *fifo = fopen(FILE_PEDIDOS, "wb");

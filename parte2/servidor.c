@@ -4,7 +4,7 @@
  ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
  ** Nome do Módulo: servidor.c v1
  ** Descrição/Explicação do Módulo: Este módulo serve para processar e validar toda a
- informação dada pelo cliente, criando a passagem, validando se os seus dados e ainda
+ informação dada pelo cliente, criando a passagem, validando os seus dados e ainda
  guardando estatísticas dos vários tipos de passagens e de anomalias. Na consola
  do servidor são ainda visíveis as diversas mensagens de erro que podem ser causadas tanto
  pelo cliente como por algum erro interno.

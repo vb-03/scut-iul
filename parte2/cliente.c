@@ -130,6 +130,7 @@ Passagem getDadosPedidoUtilizador() {
             }
         else{
                 error("C2", "Tipo de passagem inválido");
+                p.tipo_passagem = -1;
         }
     debug("C2", ">");
     return p;
@@ -170,14 +171,16 @@ int escrevePedido(Passagem dados) {
     int fileCheck = access(FILE_PEDIDOS, F_OK);
     if(fileCheck != 0){
         error("C4","O ficheiro não existe");
-        kill(pidClient, SIGKILL);
+        //kill(pidClient, SIGKILL);
+        return -1;
     }
     // escreve informações (em formato binário) nesse FIFO.
     else{ 
         FILE *fifo = fopen(FILE_PEDIDOS, "wb");
         if(fwrite(&dados, sizeof(dados), 1, fifo) < 1){
             error("C4","Erro na escrita do FIFO!\n");
-            kill(pidClient, SIGKILL);
+            //kill(pidClient, SIGKILL);
+            return -1;
         }
         else{
         fclose(fifo);

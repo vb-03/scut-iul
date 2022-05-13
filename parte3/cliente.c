@@ -2,7 +2,7 @@
  ** ISCTE-IUL: Trabalho prático 2 de Sistemas Operativos
  **
  ** Aluno: Nº:       Nome: 
- ** Nome do Módulo: cliente.c v1
+ ** Nome do Módulo: cliente.c v2
  ** Descrição/Explicação do Módulo: 
  **
  **
@@ -72,7 +72,16 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
 int getMsg() {
     debug("C1 <");
     int msgId = -1;
-
+    int testIPC = msgget(IPC_KEY,0);
+        if(testIPC == IPC_KEY){
+            msgId = testIPC;
+            success("C1", msgID);
+        }
+        else if(testIPC == -1)
+            error("C1", "Erro na message queue ou queue inexistente")
+        else{
+            error("C1", "Got unexpected IPC KEY");
+        }
     debug("C1 >");
     return msgId;
 }
@@ -89,7 +98,32 @@ Passagem getDadosPedidoUtilizador() {
     debug("C2 <");
     Passagem p;
     p.tipo_passagem = -1;   // Por omissão, retorna valor inválido
+    p.pid_cliente = getpid();
+    //char tipoNomePassagem[20];
 
+        printf("Qual o tipo de portagem? \n 1 - Normal \n 2 - Via Verde \n");
+        char getTipo[20];
+        my_fgets(getTipo,10,stdin);
+        p.tipo_passagem = atoi(getTipo);
+        
+        printf("Insira a matrícula: \n");
+        my_fgets(p.matricula,9,stdin);
+                
+        printf("Insira o lanço: \n");
+        my_fgets(p.lanco,50,stdin);
+
+        if(p.tipo_passagem == 1){
+               // char tipoNomePassagem[20] = "Normal";
+               success("C2", "Passagem do tipo Normal solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", p.matricula,p.lanco,p.pid_cliente);
+            }
+        else if(p.tipo_passagem == 2){
+                //char tipoNomePassagem[20] = "Via Verde";
+                success("C2", "Passagem do tipo Via Verde solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", p.matricula,p.lanco,p.pid_cliente);  
+            }
+        else{
+                error("C2", "Tipo de passagem inválido");
+                p.tipo_passagem = -1;
+        }
     debug("C2 >");
     return p;
 }

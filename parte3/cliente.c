@@ -1,7 +1,7 @@
 /******************************************************************************
  ** ISCTE-IUL: Trabalho prático 2 de Sistemas Operativos
  **
- ** Aluno: Nº:       Nome: 
+ ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
  ** Nome do Módulo: cliente.c v2
  ** Descrição/Explicação do Módulo: 
  **

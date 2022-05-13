@@ -1,7 +1,7 @@
 /******************************************************************************
  ** ISCTE-IUL: Trabalho prático 2 de Sistemas Operativos
  **
- ** Aluno: Vasco Mendes Baleia Nº:104670
+ ** Aluno: Nº:       Nome: 
  ** Nome do Módulo: cliente.c v1
  ** Descrição/Explicação do Módulo: 
  **
@@ -72,16 +72,7 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
 int getMsg() {
     debug("C1 <");
     int msgId = -1;
-    int testIPC = msgget(IPC_KEY,0);
-        if(testIPC == IPC_KEY){
-            msgId = testIPC;
-            success("C1", msgID);
-        }
-        else if(testIPC == -1)
-            error("C1", "Erro na message queue ou queue inexistente")
-        else{
-            error("C1", "Got unexpected IPC KEY");
-        }
+
     debug("C1 >");
     return msgId;
 }
@@ -98,38 +89,16 @@ Passagem getDadosPedidoUtilizador() {
     debug("C2 <");
     Passagem p;
     p.tipo_passagem = -1;   // Por omissão, retorna valor inválido
-    p.pid_cliente = getpid();
-        printf("Qual o tipo de portagem? \n 1 - Normal \n 2 - Via Verde \n");
-        char getTipo[20];
-        my_fgets(getTipo,10,stdin);
-        p.tipo_passagem = atoi(getTipo);
-        
-        printf("Insira a matrícula: \n");
-        my_fgets(p.matricula,9,stdin);
-                
-        printf("Insira o lanço: \n");
-        my_fgets(p.lanco,50,stdin);
-
-        if(p.tipo_passagem == 1){
-               // char tipoNomePassagem[20] = "Normal";
-               success("C2", "Passagem do tipo Normal solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", p.matricula,p.lanco,p.pid_cliente);
-            }
-        else if(p.tipo_passagem == 2){
-                //char tipoNomePassagem[20] = "Via Verde";
-                success("C2", "Passagem do tipo Via Verde solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", p.matricula,p.lanco,p.pid_cliente);  
-            }
-        else{
-                error("C2", "Tipo de passagem inválido");
-                p.tipo_passagem = -1;
-        }
 
     debug("C2 >");
     return p;
 }
 
 /**
- * C3	Envia as informações do elemento Passagem numa mensagem com o tipo de mensagem 1 e action 1 – Pedido para a message queue.
- *      Em caso de erro na escrita, dá error C3 e termina o processo Cliente, caso contrário, dá success C3 "Enviei mensagem";
+ * C3   Envia as informações do elemento Passagem numa mensagem com o tipo de mensagem 1 e action 1 – Pedido para a message queue.
+ *      Em caso de erro na escrita, dá error C3 "<Problema>", e termina o processo Cliente com exit code -1.
+ *      Caso contrário, dá success C3 "Enviei mensagem";
+ *      --> Preenche a variável global mensagem.
  *
  * @param pedido Passagem a ser enviada
  * @param msgId a msgID IPC desta Message Queue
@@ -143,23 +112,24 @@ int enviaPedido( Passagem pedido, int msgId ) {
 }
 
 /**
- * C4	Lê da message queue com msgId uma mensagem cujo tipo de mensagem é igual ao PID deste processo Cliente, 
- *      mensagem essa que poderá vir do Servidor Dedicado. Se houver algum erro dá error C4 "<Problema>",
- *      caso contrário dá success C4 "Li mensagem do Servidor".
+ * C4   Lê da message queue com msgId uma mensagem cujo tipo de mensagem é igual ao PID deste processo Cliente, 
+ *      mensagem essa que poderá vir do Servidor Dedicado. Se houver algum erro dá error C4 "<Problema>"
+ *      e termina o Cliente com exit code -1. Caso contrário, dá success C4 "Li mensagem do Servidor".
  *
  * @param msgId a msgID IPC desta Message Queue
- * @return int Sucesso
+ * @return Mensagem a mensagem lida
  */
 Mensagem recebeMensagem( int msgId ) {
     debug("C4 <");
     Mensagem mensagem;
+    pause();    // Código temporário para o Cliente não ficar em espera ativa, os alunos deverão remover esta linha quando a leitura à message queue estiver feita.
 
     debug("C4 >");
     return mensagem;
 }
 
 /**
- * C5	Se a mensagem que chegou em C4 veio com action 2 – Pedido ACK,
+ * C5   Se a mensagem que chegou em C4 veio com action 2 – Pedido ACK,
  *      serve para o Servidor Dedicado indicar que o processamento da passagem foi iniciado.
  *      Se o Cliente receber essa mensagem, dá success C5 "Passagem Iniciada", assinala que o processamento iniciou,
  *      e retorna para aguardar a conclusão do processamento do lado do Servidor Dedicado;
@@ -171,7 +141,7 @@ void pedidoAck() {
 }
 
 /**
- * C6	Se a mensagem que chegou em C4 veio com action 3 – Pedido Concluído,
+ * C6   Se a mensagem que chegou em C4 veio com action 3 – Pedido Concluído,
  *      serve para o Servidor Dedicado indicar que o processamento da passagem foi concluído.
  *      Se o Cliente receber essa mensagem, que inclui os contadores de estatística atualizados,
  *      dá success C6 "Passagem Concluída com estatísticas: <contador normal> <contador via verde> <contador anomalias>", e termina o processo Cliente. 
@@ -188,7 +158,7 @@ void pedidoConcluido( Mensagem mensagem ) {
 }
 
 /**
- * C7	Se a mensagem que chegou em C4 veio com action 4 – Pedido Cancelado,
+ * C7   Se a mensagem que chegou em C4 veio com action 4 – Pedido Cancelado,
  *      serve para o Servidor Dedicado indicar que o processamento a passagem não foi concluído.
  *      Se o Cliente receber esse sinal, dá success C7 "Processo Não Concluído e Incompleto", e termina o processo Cliente.
  */

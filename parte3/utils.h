@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <time.h>
+#include <sys/time.h>
 
 /******************************************************************************
  *  Macros para tratamento de mensagens de DEBUG
@@ -79,9 +79,11 @@
  *  Macros utilitárias
  ******************************************************************************/
 
-#define my_rand() ({    \
-    srand(time(NULL));  \
-    rand();             \
+#define my_rand() ({         \
+    struct timeval tv;       \
+    gettimeofday(&tv, NULL); \
+    srand(tv.tv_usec);       \
+    rand();                  \
 })
 
 /******************************************************************************

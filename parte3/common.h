@@ -24,7 +24,7 @@
 /**
  *  KEY to be used on all Linux IPC get operations
  */
-#define IPC_KEY 0x0a104670      // Suggestion: Replace with your student number
+#define IPC_KEY 0x0a123456      // Suggestion: Replace with your student number
 
 #define MIN_PROCESSAMENTO   1   // Tempo mínimo de processamento do Servidor
 #define MAX_PROCESSAMENTO   7   // Tempo máximo de processamento do Servidor
@@ -35,6 +35,7 @@ typedef struct {
     char matricula[9];          // Matrícula da viatura
     char lanco[50];             // Lanço da autoestrada
     int pid_cliente;            // PID do processo (Cliente) que pede passagem
+    int pid_servidor_dedicado;  // PID do processo (Servidor) dedicado ao pedido
 } Passagem;
 
 typedef struct {

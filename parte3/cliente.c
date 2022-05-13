@@ -98,7 +98,6 @@ Passagem getDadosPedidoUtilizador() {
     debug("C2 <");
     Passagem p;
     p.tipo_passagem = -1;   // Por omissão, retorna valor inválido
-    Passagem p;
     p.pid_cliente = getpid();
         printf("Qual o tipo de portagem? \n 1 - Normal \n 2 - Via Verde \n");
         char getTipo[20];
@@ -138,7 +137,7 @@ Passagem getDadosPedidoUtilizador() {
  */
 int enviaPedido( Passagem pedido, int msgId ) {
     debug("C3 <");
-    
+
     debug("C3 >");
     return 0;
 }

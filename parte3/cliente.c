@@ -72,13 +72,13 @@ int main() {    // Os alunos em princípio não deverão alterar esta função
 int getMsg() {
     debug("C1 <");
     int msgId = -1;
-    int testIPC = msgget(IPC_KEY,0);
-        if(testIPC == IPC_KEY){
-            msgId = testIPC;
-            success("C1", msgID);
+    msgId = msgget(IPC_KEY,0);
+        if(msgId == -1){
+            error("C1", "Erro na message queue ou queue inexistente");
         }
-        else if(testIPC == -1)
-            error("C1", "Erro na message queue ou queue inexistente")
+        else if(msgId == IPC_KEY){
+            success("C1", "%d" , msgId);
+        }
         else{
             error("C1", "Got unexpected IPC KEY");
         }
@@ -140,7 +140,16 @@ Passagem getDadosPedidoUtilizador() {
  */
 int enviaPedido( Passagem pedido, int msgId ) {
     debug("C3 <");
-
+    mensagem.tipoMensagem = 1;                          //Preenche a variável global mensagem.
+    mensagem.conteudo.action = 1;                       //Preenche a variável global mensagem.
+    mensagem.conteudo.dados.pedido_cliente = pedido;    //Preenche a variável global mensagem.
+    if((msgsnd(msgId, &mensagem, sizeof(pedido), 0)) == -1){
+        error("C3", "Erro no envio da mensagem");
+        exit(-1);
+    }    
+    else{
+        success("C3","Enviei mensagem");
+    }
     debug("C3 >");
     return 0;
 }
@@ -157,7 +166,12 @@ Mensagem recebeMensagem( int msgId ) {
     debug("C4 <");
     Mensagem mensagem;
     pause();    // Código temporário para o Cliente não ficar em espera ativa, os alunos deverão remover esta linha quando a leitura à message queue estiver feita.
-
+    if(msgrcv(msgId, &mensagem, sizeof(mensagem),getpid(), 0) == -1){
+        error("C4", "Erro ao receber a mensagem");
+    }
+    else{
+        success("C4","Li mensagem do servidor");
+    }
     debug("C4 >");
     return mensagem;
 }
@@ -170,7 +184,8 @@ Mensagem recebeMensagem( int msgId ) {
  */
 void pedidoAck() {
     debug("C5 <");
-
+    passagemIniciada = TRUE;
+    success("C5", "Passagem Iniciada");
     debug("C5 >");
 }
 
@@ -187,7 +202,13 @@ void pedidoAck() {
  */
 void pedidoConcluido( Mensagem mensagem ) {
     debug("C6 <");
-
+    if(passagemIniciada != TRUE){
+        error("C6", "O cliente ainda não recebeu o Pedido ACK");
+        exit(-1);
+    }else{
+        success("C6", "Passagem Concluída com estatísticas: %d %d %d", mensagem.conteudo.dados.contadores_servidor.contadorNormal, mensagem.conteudo.dados.contadores_servidor.contadorViaVerde, mensagem.conteudo.dados.contadores_servidor.contadorAnomalias);
+        exit(0);
+    }
     debug("C6 >");
 }
 
@@ -198,6 +219,7 @@ void pedidoConcluido( Mensagem mensagem ) {
  */
 void pedidoCancelado() {
     debug("C7 <");
-
+    success ("C7", "Processo Não Concluído e Incompleto");
+    exit(0);
     debug("C7 >");
 }

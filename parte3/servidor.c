@@ -1,15 +1,15 @@
 /******************************************************************************
  ** ISCTE-IUL: Trabalho prático 2 de Sistemas Operativos
  **
- ** Aluno: Nº:       Nome: 
- ** Nome do Módulo: servidor.c v1
+ ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
+ ** Nome do Módulo: servidor.c v2
  ** Descrição/Explicação do Módulo: 
  **
  **
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
-// #define DEBUG_MODE FALSE                             // To disable debug messages, uncomment this line
+#define DEBUG_MODE FALSE                             // To disable debug messages, uncomment this line
 
 /* Variáveis globais */
 int shmId;                                              // Variável que tem o ID da Shared Memory

@@ -75,12 +75,14 @@ int getMsg() {
     msgId = msgget(IPC_KEY,0);
         if(msgId == -1){
             error("C1", "Erro na message queue ou queue inexistente");
+            exit(-1);
         }
         else if(msgId == IPC_KEY){
             success("C1", "%d" , msgId);
         }
         else{
             error("C1", "Got unexpected IPC KEY");
+            exit(-1);
         }
     debug("C1 >");
     return msgId;

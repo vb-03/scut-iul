@@ -105,7 +105,20 @@ void shmView( DadosServidor* shm, int ignoreInvalid ) {
  */
 int shmGet() {
     debug("S1 <");
-
+    shmId = shmget(IPC_KEY,sizeof(*dadosServidor),0666);
+    if(shmId >= 0){
+        dadosServidor = shmat(shmId, 0, 0);
+        if(dadosServidor == NULL ){
+            error("S1", "Erro ao abrir a shared memory");
+            exit(-1);
+        }
+        else{
+            success("S1", "Abri Shared Memory já existente com ID %d", shmId);
+        }
+    }
+    else{
+       //Passa para o passo S2 pois este criará a memória
+    }
     debug("S1 >");
     return ( shmId > 0 );
 }
@@ -131,6 +144,26 @@ int shmGet() {
  */
 int shmCreateAndInit() {
     debug("S2 <");
+    shmId = shmget(IPC_KEY,sizeof(*dadosServidor), IPC_CREAT | 0666);
+    if(shmId >= 0){
+        dadosServidor = shmat(shmId, 0, 0);
+        if(dadosServidor == NULL ){
+            error("S2.1", "Erro ao abrir a shared memory");
+            exit(-1);
+        }
+        else{
+            success("S2.1", "Criei Shared Memory com ID %d", shmId);
+        }
+    }
+    //S2.2
+    for(int i = 0; i < NUM_PASSAGENS; i++){
+        dadosServidor->lista_passagens[i].tipo_passagem = -1;
+        if(dadosServidor->lista_passagens[i].tipo_passagem != -1){
+            error("S2.2", "Erro na inicialização da lista de passagens");
+            exit(-1);
+        }
+    }
+    success("S2.2","Iniciei Shared Memory Passagens");
 
     loadStats( &dadosServidor->contadores );
     debug("S2 >");
@@ -148,7 +181,25 @@ int shmCreateAndInit() {
  */
 int loadStats( Contadores* pStats ) {
     debug("S2.3 <");
-
+    int pidServer = getpid();
+    FILE *stats = fopen(FILE_STATS, "rb");
+    if (stats == NULL) {
+            pStats->contadorAnomalias = 0;
+            pStats->contadorNormal = 0;
+            pStats->contadorViaVerde = 0;
+            success("S2", "Estatísticas Iniciadas");
+        }
+    else{ 
+           if(fread(pStats, sizeof(*pStats), 1, stats) < 1){
+                error("S2","Problema ao carregar as estatisticas");
+                exit(-1);
+           }
+            else{
+            fclose(stats);
+            success("S2", "Estatísticas Carregadas");
+            }
+        
+    }
     debug("S2.3 >");
     return 0;
 }
@@ -166,6 +217,7 @@ int loadStats( Contadores* pStats ) {
  */
 int createIPC() {
     debug("S3 <");
+    msgId = msgget(IPC_KEY,0);
 
     debug("S3 >");
     return 0;

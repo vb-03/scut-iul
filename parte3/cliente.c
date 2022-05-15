@@ -2,7 +2,7 @@
  ** ISCTE-IUL: Trabalho prático 2 de Sistemas Operativos
  **
  ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
- ** Nome do Módulo: cliente.c v2
+ ** Nome do Módulo: cliente.c versão 3
  ** Descrição/Explicação do Módulo: 
  **
  **
@@ -168,6 +168,7 @@ Mensagem recebeMensagem( int msgId ) {
     pause();    // Código temporário para o Cliente não ficar em espera ativa, os alunos deverão remover esta linha quando a leitura à message queue estiver feita.
     if(msgrcv(msgId, &mensagem, sizeof(mensagem),getpid(), 0) == -1){
         error("C4", "Erro ao receber a mensagem");
+        exit(-1);
     }
     else{
         success("C4","Li mensagem do servidor");
@@ -196,7 +197,7 @@ void pedidoAck() {
  *      dá success C6 "Passagem Concluída com estatísticas: <contador normal> <contador via verde> <contador anomalias>", e termina o processo Cliente. 
  *      ATENÇÂO: Deverá previamente validar que anteriormente este Cliente já tinha recebido a mensagem com action 2 – Pedido ACK (ver C5),
  *               indicando que o processamento do lado do Servidor Dedicado teve início,
- *               caso contrário, em vez de sucesso, dá error C6 e termina o processo Cliente;
+ *               caso contrário, em vez de sucesso, dá error C6 e termina o processo Cliente com exit code -1;
  *
  * @param mensagem Mensagem recebida do Servidor Dedicado
  */
@@ -215,11 +216,11 @@ void pedidoConcluido( Mensagem mensagem ) {
 /**
  * C7   Se a mensagem que chegou em C4 veio com action 4 – Pedido Cancelado,
  *      serve para o Servidor Dedicado indicar que o processamento a passagem não foi concluído.
- *      Se o Cliente receber esse sinal, dá success C7 "Processo Não Concluído e Incompleto", e termina o processo Cliente.
+ *      Se o Cliente receber esse sinal, dá success C7 "Processo Não Concluído e Incompleto", e termina o processo Cliente om exit code -1.
  */
 void pedidoCancelado() {
     debug("C7 <");
     success ("C7", "Processo Não Concluído e Incompleto");
-    exit(0);
+    exit(-1);
     debug("C7 >");
 }

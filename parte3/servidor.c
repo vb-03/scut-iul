@@ -445,9 +445,8 @@ int apagaEntradaBD( DadosServidor* dadosServidor, int indice_lista ) {
  */
 int sd_iniciaProcessamento( Mensagem pedido ) {
     debug("SD10 <");
-        int aleatorio = (my_rand() % (MAX_PROCESSAMENTO - MIN_PROCESSAMENTO + 1)) + MIN_PROCESSAMENTO;
-        success("SD15", "Sleeping %d", aleatorio);
-        sleep(aleatorio);
+
+    success("SD10","Início Passagem %d %d",pedido.conteudo.dados.pedido_cliente.pid_cliente,getpid());
     debug("SD10 >");
     return 0;
 }
@@ -460,7 +459,9 @@ int sd_iniciaProcessamento( Mensagem pedido ) {
  */
 int sd_sleepRandomTime() {
     debug("SD11 <");
-
+    int aleatorio = (my_rand() % (MAX_PROCESSAMENTO - MIN_PROCESSAMENTO + 1)) + MIN_PROCESSAMENTO;
+    success("SD11", "%d", aleatorio);
+    sleep(aleatorio);
     debug("SD11 >");
     return 0;
 }
@@ -477,7 +478,8 @@ int sd_sleepRandomTime() {
  */
 int sd_terminaProcessamento( Mensagem pedido ) {
     debug("SD12 <");
-
+    
+    success("SD12","Fim Passagem %d %d",pedido.conteudo.dados.pedido_cliente.pid_cliente,getpid());
     debug("SD12 >");
     return 0;
 }
@@ -489,7 +491,9 @@ int sd_terminaProcessamento( Mensagem pedido ) {
  */
 void sd_trataSinalSIGHUP(int sinalRecebido) {
     debug("SD13 <");
-
+    
+    success("SD13","Processamento Cancelado");
+    return -1;
     debug("SD13 >");
 }
 

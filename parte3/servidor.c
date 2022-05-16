@@ -374,12 +374,8 @@ void sendMessageifError( Mensagem pedido){
 
 int sd_validaPedido( Mensagem pedido ) {
     debug("SD8 <");
-          //char tipoNomePassagem[20];
-          printf("%d\n", pedido.conteudo.dados.pedido_cliente.tipo_passagem);
-          printf("%s\n", pedido.conteudo.dados.pedido_cliente.matricula);
-          printf("%s\n", pedido.conteudo.dados.pedido_cliente.lanco);
-          
-    if (pedido.conteudo.dados.pedido_cliente.tipo_passagem < 1 || pedido.conteudo.dados.pedido_cliente.tipo_passagem > 2){
+    //char tipoNomePassagem[20];
+    if (pedido.conteudo.dados.pedido_cliente.tipo_passagem < TIPO_PASSAGEM_NORMAL || pedido.conteudo.dados.pedido_cliente.tipo_passagem > TIPO_PASSAGEM_VIAVERDE){
         error("SD8", "Tipo de passagem inválida");
         dadosServidor->contadores.contadorAnomalias++;
         sendMessageifError(pedido);
@@ -404,11 +400,11 @@ int sd_validaPedido( Mensagem pedido ) {
             exit(-1);
         }
     else{
-        if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 1){
+        if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_NORMAL){
             //char tipoNomePassagem[20] = "Normal";
             success("SD8", "Chegou novo pedido de passagem do tipo Normal solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", pedido.conteudo.dados.pedido_cliente.matricula, pedido.conteudo.dados.pedido_cliente.lanco, pedido.conteudo.dados.pedido_cliente.pid_cliente);
         }
-        else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 2){
+        else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_VIAVERDE){
             //char tipoNomePassagem[20] = "Via Verde";
             success("SD8", "Chegou novo pedido de passagem do tipo Via Verde solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", pedido.conteudo.dados.pedido_cliente.matricula, pedido.conteudo.dados.pedido_cliente.lanco, pedido.conteudo.dados.pedido_cliente.pid_cliente);
         }
@@ -434,9 +430,9 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
             if(dadosServidor->lista_passagens[i].tipo_passagem == -1){ 
                 indiceLista = i;
                 dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
-                if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 1){
+                if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_NORMAL){
                     dadosServidor->contadores.contadorNormal++;
-                }else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 2){
+                }else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_VIAVERDE){
                     dadosServidor->contadores.contadorViaVerde++;
                     }
                 pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado = getpid();

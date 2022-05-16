@@ -295,9 +295,10 @@ void trataSinalSIGINT( int sinalRecebido ) {
     success("S6", "Shutdown Servidor");
         //S6.1
         for(int i = 0; i < NUM_PASSAGENS; i++){
-            if (dadosServidor->lista_passagens[i].tipo_passagem > 0)
-                kill(dadosServidor->lista_passagens[i].tipo_passagem, SIGHUP);
+            if (dadosServidor->lista_passagens[i].tipo_passagem > 0){
+                kill(dadosServidor->lista_passagens[i].pid_servidor_dedicado, SIGHUP);
             }
+        }
         success("S6.1", "Shutdown Servidores Dedicados");
         //S6.2
         FILE* st = fopen(FILE_STATS,"wb");
@@ -314,12 +315,14 @@ void trataSinalSIGINT( int sinalRecebido ) {
             }
         }
         //S6.3
+        success("S6.3","Shutdown Servidor completo");
         if(msgctl( msgId, IPC_RMID, NULL) < 0 ){
             error("S6.3","Erro ao eliminar a fila de mensagens");
             exit(-1);
         }
-        success("S6.3","Shutdown Servidor completo");
-        exit(0);
+        else{
+            exit(0);
+        }
         debug("S6 >");
 }
 
@@ -332,7 +335,7 @@ void trataSinalSIGINT( int sinalRecebido ) {
 int sd_armaSinais() {
     debug("SD7 <");
     signal(SIGHUP,sd_trataSinalSIGHUP);
-    signal(SIGINT,SIG_IGN);
+    signal(SIGINT,trataSinalSIGINT);
     success("SD7","Servidor Dedicado Armei Sinais");
     debug("SD7 >");
     return 0;
@@ -523,6 +526,8 @@ int sd_terminaProcessamento( Mensagem pedido ) { //Estatísticas aqui????'
     debug("SD12 <");
     pedido.conteudo.action = 3;
     pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
+    pedido.conteudo.dados.contadores_servidor = dadosServidor->contadores;
+    apagaEntradaBD(dadosServidor, indice_lista);
     if(msgsnd(msgId,&pedido,sizeof(pedido.conteudo),0) < 0){
         error("SD12","Erro ao enviar a mensagem");
         exit(-1);
@@ -530,6 +535,7 @@ int sd_terminaProcessamento( Mensagem pedido ) { //Estatísticas aqui????'
         //O cliente recebe a mensagem e informará o utilizador
         }
     success("SD12","Fim Passagem %d %d",pedido.conteudo.dados.pedido_cliente.pid_cliente,getpid());
+    exit(0);
     debug("SD12 >");
     return 0;
 }
@@ -543,6 +549,7 @@ void sd_trataSinalSIGHUP(int sinalRecebido) {
     debug("SD13 <");
     mensagem.conteudo.action = 3;
     mensagem.tipoMensagem = mensagem.conteudo.dados.pedido_cliente.pid_cliente;
+    apagaEntradaBD(dadosServidor,indice_lista);
     if(msgsnd(msgId,&mensagem,sizeof(mensagem.conteudo),0) < 0){
         error("SD13","Erro ao enviar a mensagem");
         exit(-1);
@@ -550,7 +557,7 @@ void sd_trataSinalSIGHUP(int sinalRecebido) {
         //O cliente recebe a mensagem e informará o utilizador
         }
     success("SD13","Processamento Cancelado");
-    exit(0);
+    exit(-1);
     debug("SD13 >");
 }
 

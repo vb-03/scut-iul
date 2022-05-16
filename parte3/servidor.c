@@ -359,7 +359,6 @@ int sd_validaPedido( Mensagem pedido ) {
     if (pedido.conteudo.dados.pedido_cliente.tipo_passagem < 1 || pedido.conteudo.dados.pedido_cliente.tipo_passagem > 2){
         error("SD8", "Tipo de passagem inválida");
         dadosServidor->contadores.contadorAnomalias++;
-        //MANDAR MENSAGEM QUANDO PID MAIOR QUE ZERO
         return (-1);
         }
     else if (pedido.conteudo.dados.pedido_cliente.matricula == NULL || strcmp(pedido.conteudo.dados.pedido_cliente.matricula,"") == 0 ){ 
@@ -375,9 +374,21 @@ int sd_validaPedido( Mensagem pedido ) {
     else if(pedido.conteudo.dados.pedido_cliente.pid_cliente <= 0){
             error("SD8", "PID Inválido");
             dadosServidor->contadores.contadorAnomalias++;
-            return -1;
+            return (-1);
         }
-    else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 1){
+          else{
+              pedido.conteudo.action = 4;
+              pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
+              if(msgsnd(IPC_KEY,&pedido,sizeof(pedido),0) < 0){
+                error("SD8","Erro ao enviar a mensagem");
+                exit(-1);
+              }
+              else{
+                  //O cliente recebe a mensagem e informará o utilizador
+              }
+          }
+    
+    if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 1){
             //char tipoNomePassagem[20] = "Normal";
             success("SD8", "Chegou novo pedido de passagem do tipo Normal solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", pedido.conteudo.dados.pedido_cliente.matricula, pedido.conteudo.dados.pedido_cliente.lanco, pedido.conteudo.dados.pedido_cliente.pid_cliente);
         }
@@ -418,7 +429,12 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
         }
             error("S8","Lista de Passagens cheia");
             dadosServidor->contadores.contadorAnomalias++;
-            //kill(pedido.conteudo.dados.pedido_cliente.pid_cliente, SIGHUP); SUBSTITUIR POR MSG
+                if(msgsnd(IPC_KEY,&pedido,sizeof(pedido),0) < 0){
+                error("SD8","Erro ao enviar a mensagem");
+                exit(-1);
+              } else{
+                  //O cliente recebe a mensagem e informará o utilizador
+              }
             return -1;
     debug("SD9 >");
     return indiceLista;
@@ -445,7 +461,9 @@ int apagaEntradaBD( DadosServidor* dadosServidor, int indice_lista ) {
  */
 int sd_iniciaProcessamento( Mensagem pedido ) {
     debug("SD10 <");
-    
+    pedido.conteudo.action = 2;
+    pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
+
     success("SD10","Início Passagem %d %d",pedido.conteudo.dados.pedido_cliente.pid_cliente,getpid());
     debug("SD10 >");
     return 0;

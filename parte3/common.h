@@ -24,7 +24,7 @@
 /**
  *  KEY to be used on all Linux IPC get operations
  */
-#define IPC_KEY 0x0a104670      // Suggestion: Replace with your student number
+#define IPC_KEY 0x0a123456      // Suggestion: Replace with your student number
 
 #define MIN_PROCESSAMENTO   1   // Tempo mínimo de processamento do Servidor
 #define MAX_PROCESSAMENTO   7   // Tempo máximo de processamento do Servidor
@@ -61,6 +61,21 @@ typedef struct {
 } Mensagem;
 
 #define FILE_STATS "estatisticas.dat"       // Ficheiro que armazena as estatísticas necessárias para o programa
+
+// Defines para o campo action da estrutura Mensagem.conteudo
+#define ACTION_PEDIDO            1
+#define ACTION_PEDIDO_ACK        2
+#define ACTION_PEDIDO_CONCLUIDO  3
+#define ACTION_PEDIDO_CANCELADO  4
+
+// Defines para o campo tipo_passagem da estrutura Passagem
+#define TIPO_PASSAGEM_INVALIDO  -1
+#define TIPO_PASSAGEM_NORMAL     1
+#define TIPO_PASSAGEM_VIAVERDE   2
+
+// Defines para identificar cada um dos semáforos do Grupo de Semáforos
+#define SEM_ESTATISTICAS         0
+#define SEM_LISTAPASSAGENS       1
 
 /* OS ALUNOS NÃO DEVERÃO ACRESCENTAR NADA A ESTE FICHEIRO! */
 

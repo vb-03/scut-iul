@@ -414,7 +414,7 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
                     }
                 success("S8","Entrada %d preenchida",listIndex);
                 return listIndex;
-             }
+            }
         }
             error("S8","Lista de Passagens cheia");
             dadosServidor->contadores.contadorAnomalias++;

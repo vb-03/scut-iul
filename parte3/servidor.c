@@ -268,9 +268,10 @@ Mensagem recebePedido() {
 int criaServidorDedicado() {
     debug("S5 <");
     int pidFilho = -1;
-        pidFilho = fork();
+    pidFilho = fork();
         if(pidFilho == -1){
             error("S5","Fork");
+            return -1;
         }
         if(pidFilho !=0){
             success("S5","Criado Servidor Dedicado com PID %d", pidFilho);
@@ -354,7 +355,7 @@ int sd_armaSinais() {
  * @return int Sucesso
  */
 void sendMessageifError( Mensagem pedido){
-            if(pedido.conteudo.dados.pedido_cliente.pid_cliente > 0){
+        if(pedido.conteudo.dados.pedido_cliente.pid_cliente > 0){
             pedido.conteudo.action = 4;
             pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
             if(msgsnd(msgId,&pedido,sizeof(pedido.conteudo),0) < 0){
@@ -366,6 +367,7 @@ void sendMessageifError( Mensagem pedido){
                 //O cliente recebe a mensagem e informará o utilizador
             }
         }
+        exit(-1);
     }
 
 int sd_validaPedido( Mensagem pedido ) {
@@ -426,27 +428,31 @@ int sd_validaPedido( Mensagem pedido ) {
 int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
     debug("SD9 <");
     int indiceLista = -1;
-    int listIndex = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(dadosServidor->lista_passagens[i].tipo_passagem == -1){ 
-                listIndex = i;
+                indiceLista = i;
                 dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
                 if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 1){
                     dadosServidor->contadores.contadorNormal++;
                 }else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 2){
                     dadosServidor->contadores.contadorViaVerde++;
                     }
-                success("SD9","Entrada %d preenchida",listIndex);
-                return listIndex;
+                pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado = getpid();
+                success("SD9","Entrada %d preenchida",indiceLista);
+                return indiceLista;
             }
         }
             error("SD9","Lista de Passagens cheia");
             dadosServidor->contadores.contadorAnomalias++;
+            kill(pedido.conteudo.dados.pedido_cliente.pid_cliente,SIGHUP);
+            pedido.conteudo.action = 4;
+            pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
             if(msgsnd(msgId,&pedido,sizeof(pedido.conteudo),0) < 0){
                 error("SD9","Erro ao enviar a mensagem");
                 exit(-1);
               } else{
                   //O cliente recebe a mensagem e informará o utilizador
+                  exit(-1);
               }
             //return -1;
     debug("SD9 >");

@@ -9,7 +9,6 @@
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
-//#define DEBUG_MODE FALSE             // To disable debug messages, uncomment this line
 
 /* Variáveis globais */
 Mensagem mensagem;                      // Variável que tem o pedido enviado do Cliente para o Servidor

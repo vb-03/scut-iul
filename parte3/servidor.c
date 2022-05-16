@@ -9,7 +9,6 @@
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
-//#define DEBUG_MODE FALSE                             // To disable debug messages, uncomment this line
 
 /* Variáveis globais */
 int shmId;                                              // Variável que tem o ID da Shared Memory

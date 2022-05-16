@@ -120,7 +120,7 @@ int shmGet() {
        //Passa para o passo S2 pois este criará a memória
     }
     debug("S1 >");
-    return ( shmId > 0 );
+    return ( shmId > 0 ); //Maior ou igual
 }
 
 /**
@@ -217,8 +217,13 @@ int loadStats( Contadores* pStats ) {
  */
 int createIPC() {
     debug("S3 <");
-    msgId = msgget(IPC_KEY,0);
-
+    msgId = msgget(IPC_KEY, IPC_CREAT | 0666);
+    signal(SIGINT,trataSinalSIGINT);
+    signal(SIGCHLD,SIG_IGN);
+    if(msgId < 0){
+        error("S3","Erro ao criar a message queue");
+    }
+    success("S3","Criei mecanismos IPC");
     debug("S3 >");
     return 0;
 }
@@ -234,8 +239,20 @@ int createIPC() {
 Mensagem recebePedido() {
     debug("S4 <");
     Mensagem mensagem;
-    pause();    // Código temporário para o servidor não ficar em espera ativa, os alunos deverão remover esta linha quando a leitura à message queue estiver feita.
-
+    if(msgrcv(msgId,&mensagem, sizeof(mensagem.conteudo),1,0 >= 0)){
+        if(mensagem.tipoMensagem != 1){
+            error("S4","Tipo de Mensagem Incorreto");
+            exit(-1);
+        } 
+        else{
+            success("S4","Li pedido do Cliente");
+        }
+    }
+    else{
+        error("S4","Erro na leitura do pedido do Cliente");
+        exit(-1);
+    }
+    
     debug("S4 >");
     return mensagem;
 }
@@ -251,7 +268,13 @@ Mensagem recebePedido() {
 int criaServidorDedicado() {
     debug("S5 <");
     int pidFilho = -1;
-
+        pidFilho = fork();
+        if(pidFilho == -1){
+            error("S5","Fork");
+        }
+        if(pidFilho !=0){
+            success("S5","Criado Servidor Dedicado com PID %d", pidFilho);
+        }
     debug("S5 >");
     return pidFilho;
 }
@@ -268,8 +291,35 @@ int criaServidorDedicado() {
  */
 void trataSinalSIGINT( int sinalRecebido ) {
     debug("S6 <");
-
-    debug("S6 >");
+    success("S6", "Shutdown Servidor");
+        //S6.1
+        for(int i = 0; i < NUM_PASSAGENS; i++){
+            if (dadosServidor->lista_passagens[i].tipo_passagem > 0)
+                kill(dadosServidor->lista_passagens[i].tipo_passagem, SIGHUP);
+            }
+        success("S6.1", "Shutdown Servidores Dedicados");
+        //S6.2
+        FILE* st = fopen(FILE_STATS,"wb");
+        if(st == NULL){
+            error("S6.2","Erro ao abrir o ficheiro %s", FILE_STATS);
+        }
+        else{
+            if(fwrite(&dadosServidor->contadores, sizeof(dadosServidor->contadores), 1, st) < 1){
+                error("S6.2", "Erro a carregar estatísticas");
+            }   
+            else{
+                success("S6.2", "Estatísticas Guardadas");
+                fclose(st);
+            }
+        }
+        //S6.3
+        if(msgctl( msgId, IPC_RMID, NULL < 0 )){
+            error("S6.3","Erro ao eliminar a fila de mensagens");
+            exit(-1);
+        }
+        success("S6.3","Shutdown Servidor completo");
+        exit(0);
+        debug("S6 >");
 }
 
 /**
@@ -280,7 +330,9 @@ void trataSinalSIGINT( int sinalRecebido ) {
  */
 int sd_armaSinais() {
     debug("SD7 <");
-
+    signal(SIGHUP,sd_trataSinalSIGHUP);
+    signal(SIGINT,SIG_IGN);
+    success("SD7","Servidor Dedicado Armei Sinais");
     debug("SD7 >");
     return 0;
 }
@@ -303,7 +355,35 @@ int sd_armaSinais() {
  */
 int sd_validaPedido( Mensagem pedido ) {
     debug("SD8 <");
-
+          //char tipoNomePassagem[20];
+    if (pedido.conteudo.dados.pedido_cliente.tipo_passagem < 1 || pedido.conteudo.dados.pedido_cliente.tipo_passagem > 2){
+        error("SD8", "Tipo de passagem inválida");
+        dadosServidor->contadores.contadorAnomalias++;
+        return (-1);
+        }
+    else if (pedido.conteudo.dados.pedido_cliente.matricula == NULL || strcmp(pedido.conteudo.dados.pedido_cliente.matricula,"") == 0 ){ 
+            error("SD8", "Matrícula inválida");
+            dadosServidor->contadores.contadorAnomalias++;
+            return (-1);
+        }
+    else if (pedido.conteudo.dados.pedido_cliente.lanco == NULL || strcmp(pedido.conteudo.dados.pedido_cliente.lanco,"") == 0 ){
+            error("SD8", "Lanço inválida");
+            dadosServidor->contadores.contadorAnomalias++;
+            return(-1);
+        }
+    else if(pedido.conteudo.dados.pedido_cliente.pid_cliente <= 0){
+            error("SD8", "PID Inválido");
+            dadosServidor->contadores.contadorAnomalias++;
+            return -1;
+        }
+    else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 1){
+            //char tipoNomePassagem[20] = "Normal";
+            success("SD8", "Chegou novo pedido de passagem do tipo Normal solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", pedido.conteudo.dados.pedido_cliente.matricula, pedido.conteudo.dados.pedido_cliente.lanco, pedido.conteudo.dados.pedido_cliente.pid_cliente);
+        }
+    else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 2){
+            //char tipoNomePassagem[20] = "Via Verde";
+            success("SD8", "Chegou novo pedido de passagem do tipo Via Verde solicitado pela viatura com matrícula %s para o Lanço %s e com PID %d", pedido.conteudo.dados.pedido_cliente.matricula, pedido.conteudo.dados.pedido_cliente.lanco, pedido.conteudo.dados.pedido_cliente.pid_cliente);
+        }
     debug("SD8 >");
     return 0;
 }
@@ -321,7 +401,24 @@ int sd_validaPedido( Mensagem pedido ) {
 int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
     debug("SD9 <");
     int indiceLista = -1;
-
+    int listIndex = -1;
+        for(int i = 0; i < NUM_PASSAGENS; i++){
+            if(dadosServidor->lista_passagens[i].tipo_passagem == -1){ 
+                listIndex = i;
+                dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
+                if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 1){
+                    dadosServidor->contadores.contadorNormal++;
+                }else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == 2){
+                    dadosServidor->contadores.contadorViaVerde++;
+                    }
+                success("S8","Entrada %d preenchida",listIndex);
+                return listIndex;
+             }
+        }
+            error("S8","Lista de Passagens cheia");
+            dadosServidor->contadores.contadorAnomalias++;
+            //kill(pedido.conteudo.dados.pedido_cliente.pid_cliente, SIGHUP); SUBSTITUIR POR MSG
+            return -1;
     debug("SD9 >");
     return indiceLista;
 }
@@ -347,7 +444,9 @@ int apagaEntradaBD( DadosServidor* dadosServidor, int indice_lista ) {
  */
 int sd_iniciaProcessamento( Mensagem pedido ) {
     debug("SD10 <");
-
+        int aleatorio = (my_rand() % (MAX_PROCESSAMENTO - MIN_PROCESSAMENTO + 1)) + MIN_PROCESSAMENTO;
+        success("SD15", "Sleeping %d", aleatorio);
+        sleep(aleatorio);
     debug("SD10 >");
     return 0;
 }

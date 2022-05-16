@@ -223,6 +223,8 @@ int createIPC() {
         error("S3","Erro ao criar a message queue");
     }
     success("S3","Criei mecanismos IPC");
+    semNrSetValue(SEM_ESTATISTICAS,1);
+    semNrSetValue(SEM_LISTAPASSAGENS,1);
     debug("S3 >");
     return 0;
 }
@@ -517,7 +519,7 @@ int sd_sleepRandomTime() {
  *
  * @return int Sucesso
  */
-int sd_terminaProcessamento( Mensagem pedido ) { //Estatísticas aqui????'
+int sd_terminaProcessamento( Mensagem pedido ) {
     debug("SD12 <");
     pedido.conteudo.action = 3;
     pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;

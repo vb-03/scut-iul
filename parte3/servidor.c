@@ -359,6 +359,7 @@ int sd_validaPedido( Mensagem pedido ) {
     if (pedido.conteudo.dados.pedido_cliente.tipo_passagem < 1 || pedido.conteudo.dados.pedido_cliente.tipo_passagem > 2){
         error("SD8", "Tipo de passagem inválida");
         dadosServidor->contadores.contadorAnomalias++;
+        //MANDAR MENSAGEM QUANDO PID MAIOR QUE ZERO
         return (-1);
         }
     else if (pedido.conteudo.dados.pedido_cliente.matricula == NULL || strcmp(pedido.conteudo.dados.pedido_cliente.matricula,"") == 0 ){ 
@@ -430,7 +431,7 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
  */
 int apagaEntradaBD( DadosServidor* dadosServidor, int indice_lista ) {
     debug("<");
-
+    dadosServidor->lista_passagens[indice_lista].tipo_passagem=-1;
     debug(">");
     return 0;
 }

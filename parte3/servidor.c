@@ -431,7 +431,7 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
  */
 int apagaEntradaBD( DadosServidor* dadosServidor, int indice_lista ) {
     debug("<");
-    dadosServidor->lista_passagens[indice_lista].tipo_passagem=-1;
+    dadosServidor->lista_passagens[indice_lista].tipo_passagem = -1;
     debug(">");
     return 0;
 }

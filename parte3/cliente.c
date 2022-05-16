@@ -9,7 +9,7 @@
  ******************************************************************************/
 #include "common.h"
 #include "utils.h"
-#define DEBUG_MODE FALSE             // To disable debug messages, uncomment this line
+//#define DEBUG_MODE FALSE             // To disable debug messages, uncomment this line
 
 /* Variáveis globais */
 Mensagem mensagem;                      // Variável que tem o pedido enviado do Cliente para o Servidor
@@ -77,13 +77,15 @@ int getMsg() {
             error("C1", "Erro na message queue ou queue inexistente");
             exit(-1);
         }
-        else if(msgId == IPC_KEY){
+        else{
+        //if(msgId == IPC_KEY){
             success("C1", "%d" , msgId);
         }
-        else{
+        /* else{
             error("C1", "Got unexpected IPC KEY");
             exit(-1);
         }
+        */
     debug("C1 >");
     return msgId;
 }
@@ -145,7 +147,7 @@ int enviaPedido( Passagem pedido, int msgId ) {
     mensagem.tipoMensagem = 1;                          //Preenche a variável global mensagem.
     mensagem.conteudo.action = 1;                       //Preenche a variável global mensagem.
     mensagem.conteudo.dados.pedido_cliente = pedido;    //Preenche a variável global mensagem.
-    if((msgsnd(msgId, &mensagem, sizeof(pedido), 0)) == -1){
+    if((msgsnd(msgId, &mensagem, sizeof(mensagem.conteudo), 0)) < 0){
         error("C3", "Erro no envio da mensagem");
         exit(-1);
     }    
@@ -167,8 +169,8 @@ int enviaPedido( Passagem pedido, int msgId ) {
 Mensagem recebeMensagem( int msgId ) {
     debug("C4 <");
     Mensagem mensagem;
-    pause();    // Código temporário para o Cliente não ficar em espera ativa, os alunos deverão remover esta linha quando a leitura à message queue estiver feita.
-    if(msgrcv(msgId, &mensagem, sizeof(mensagem),getpid(), 0) == -1){
+    //pause();    // Código temporário para o Cliente não ficar em espera ativa, os alunos deverão remover esta linha quando a leitura à message queue estiver feita.
+    if(msgrcv(msgId, &mensagem, sizeof(mensagem),getpid(), 0) < 0){
         error("C4", "Erro ao receber a mensagem");
         exit(-1);
     }

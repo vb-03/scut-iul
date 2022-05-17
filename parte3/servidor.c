@@ -223,6 +223,11 @@ int createIPC() {
         error("S3","Erro ao criar a message queue");
     }
     success("S3","Criei mecanismos IPC");
+    semId = semCreate(2);
+    if(semId < 0){
+        error("SD14","Semáforos não criados");
+        exit(-1);
+    }
     semNrSetValue(SEM_ESTATISTICAS,1);
     semNrSetValue(SEM_LISTAPASSAGENS,1);
     debug("S3 >");

@@ -144,7 +144,7 @@ Passagem getDadosPedidoUtilizador() {
 int enviaPedido( Passagem pedido, int msgId ) {
     debug("C3 <");
     mensagem.tipoMensagem = 1;                          //Preenche a variável global mensagem.
-    mensagem.conteudo.action = 1;                       //Preenche a variável global mensagem.
+    mensagem.conteudo.action = ACTION_PEDIDO;                       //Preenche a variável global mensagem.
     mensagem.conteudo.dados.pedido_cliente = pedido;    //Preenche a variável global mensagem.
     if((msgsnd(msgId, &mensagem, sizeof(mensagem.conteudo), 0)) < 0){
         error("C3", "Erro no envio da mensagem");

@@ -156,8 +156,8 @@ int shmCreateAndInit() {
     }
     //S2.2
     for(int i = 0; i < NUM_PASSAGENS; i++){
-        dadosServidor->lista_passagens[i].tipo_passagem = -1;
-        if(dadosServidor->lista_passagens[i].tipo_passagem != -1){
+        dadosServidor->lista_passagens[i].tipo_passagem = TIPO_PASSAGEM_INVALIDO;
+        if(dadosServidor->lista_passagens[i].tipo_passagem != TIPO_PASSAGEM_INVALIDO){
             error("S2.2", "Erro na inicialização da lista de passagens");
             exit(-1);
         }
@@ -289,17 +289,20 @@ int criaServidorDedicado() {
  *      S6.2    Cria o ficheiro FILE_STATS, escrevendo nele o valor de 3 inteiros (em formato binário), correspondentes a
  *              <contador de passagens Normal>  <contador de passagens Via Verde>  <contador Passagens com Anomalia>
  *              Em caso de erro, dá error S6.2, caso contrário, dá success S6.2 "Estatísticas Guardadas";
- *      S6.3    Dá success S6.3 "Shutdown Servidor completo" e termina o processo Servidor com exit code 0.
+ *      S6.3    Dá success S6.3 "Shutdown Servidor completo", apaga a Message Queue e o grupo de Semáforos 
+*               criados (mas não apaga a Shared Memory), e termina o processo Servidor com exit code 0
  */
 void trataSinalSIGINT( int sinalRecebido ) {
     debug("S6 <");
     success("S6", "Shutdown Servidor");
         //S6.1
+        semNrDown(SEM_ESTATISTICAS);
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if (dadosServidor->lista_passagens[i].tipo_passagem > 0){
                 kill(dadosServidor->lista_passagens[i].pid_servidor_dedicado, SIGHUP);
             }
         }
+        semNrUp(SEM_ESTATISTICAS);
         success("S6.1", "Shutdown Servidores Dedicados");
         //S6.2
         FILE* st = fopen(FILE_STATS,"wb");
@@ -307,15 +310,19 @@ void trataSinalSIGINT( int sinalRecebido ) {
             error("S6.2","Erro ao abrir o ficheiro %s", FILE_STATS);
         }
         else{
+            semNrDown(SEM_ESTATISTICAS);
             if(fwrite(&dadosServidor->contadores, sizeof(dadosServidor->contadores), 1, st) < 1){
                 error("S6.2", "Erro a carregar estatísticas");
             }   
             else{
+                semNrUp(SEM_ESTATISTICAS);
                 success("S6.2", "Estatísticas Guardadas");
                 fclose(st);
             }
         }
         //S6.3
+        if(semRemove() < 0)
+            error("S6.3","Erro ao remover semáforos");
         success("S6.3","Shutdown Servidor completo");
         if(msgctl( msgId, IPC_RMID, NULL) < 0 ){
             error("S6.3","Erro ao eliminar a fila de mensagens");
@@ -360,7 +367,7 @@ int sd_armaSinais() {
  */
 void sendMessageifError( Mensagem pedido){
         if(pedido.conteudo.dados.pedido_cliente.pid_cliente > 0){
-            pedido.conteudo.action = 4;
+            pedido.conteudo.action = ACTION_PEDIDO_CANCELADO;
             pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
             if(msgsnd(msgId,&pedido,sizeof(pedido.conteudo),0) < 0){
                 error("SD8","Erro ao enviar a mensagem");
@@ -429,7 +436,7 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
     debug("SD9 <");
     int indiceLista = -1;
         for(int i = 0; i < NUM_PASSAGENS; i++){
-            if(dadosServidor->lista_passagens[i].tipo_passagem == -1){ 
+            if(dadosServidor->lista_passagens[i].tipo_passagem == TIPO_PASSAGEM_INVALIDO){ 
                 indiceLista = i;
                 dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
                 if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_NORMAL){
@@ -445,7 +452,7 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
             error("SD9","Lista de Passagens cheia");
             dadosServidor->contadores.contadorAnomalias++;
             kill(pedido.conteudo.dados.pedido_cliente.pid_cliente,SIGHUP);
-            pedido.conteudo.action = 4;
+            pedido.conteudo.action = ACTION_PEDIDO_CANCELADO;
             pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
             if(msgsnd(msgId,&pedido,sizeof(pedido.conteudo),0) < 0){
                 error("SD9","Erro ao enviar a mensagem");
@@ -480,7 +487,7 @@ int apagaEntradaBD( DadosServidor* dadosServidor, int indice_lista ) {
  */
 int sd_iniciaProcessamento( Mensagem pedido ) {
     debug("SD10 <");
-    pedido.conteudo.action = 2;
+    pedido.conteudo.action = ACTION_PEDIDO_ACK;
     pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
     pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado = getpid();
     if(msgsnd(msgId,&pedido,sizeof(pedido.conteudo),0) < 0){
@@ -521,7 +528,7 @@ int sd_sleepRandomTime() {
  */
 int sd_terminaProcessamento( Mensagem pedido ) {
     debug("SD12 <");
-    pedido.conteudo.action = 3;
+    pedido.conteudo.action = ACTION_PEDIDO_CONCLUIDO;
     pedido.tipoMensagem = pedido.conteudo.dados.pedido_cliente.pid_cliente;
     pedido.conteudo.dados.contadores_servidor = dadosServidor->contadores;
     apagaEntradaBD(dadosServidor, indice_lista);

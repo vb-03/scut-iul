@@ -40,7 +40,6 @@
  *  @param errorMsg mensagem de erro a apresentar em caso de erro
  */
 #define exit_on_null(status, errorMsg) do { if (NULL == status) { perror(errorMsg); exit(-1); } } while (0)
-
 /******************************************************************************
  *  Macros para leitura de Strings de um ficheiro ou do STDIN
  ******************************************************************************/

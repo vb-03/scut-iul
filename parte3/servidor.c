@@ -414,8 +414,6 @@ int loadStats( Contadores* pStats ) {
 int createIPC() {
     debug("S3 <");
     msgId = msgget(IPC_KEY, IPC_CREAT | 0666);
-    signal(SIGINT,trataSinalSIGINT);
-    signal(SIGCHLD,SIG_IGN);
     if(msgId < 0){
         error("S3","Erro ao criar a message queue");
         exit(-1);
@@ -425,15 +423,19 @@ int createIPC() {
 		    error("S3", "Não foi possível remover a message queue");
             exit(-1);
 	    }
+        msgId = msgget(IPC_KEY, IPC_CREAT | 0666);
+        signal(SIGINT,trataSinalSIGINT);
+        signal(SIGCHLD,SIG_IGN);
+        semId = semCreate(2);
+        if(semId < 0){
+            error("SD14","Semáforos não criados");
+            exit(-1);
+        }
+        semNrSetValue(semId, SEM_ESTATISTICAS,1);
+        semNrSetValue(semId, SEM_LISTAPASSAGENS,1);
+        success("S3","Criei mecanismos IPC");
     }
-    success("S3","Criei mecanismos IPC");
-    semId = semCreate(2);
-    if(semId < 0){
-        error("SD14","Semáforos não criados");
-        exit(-1);
-    }
-    semNrSetValue(semId, SEM_ESTATISTICAS,1);
-    semNrSetValue(semId, SEM_LISTAPASSAGENS,1);
+
     debug("S3 >");
     return 0;
 }
@@ -450,7 +452,7 @@ Mensagem recebePedido() {
     debug("S4 <");
     Mensagem mensagem;
     if(msgrcv(msgId,&mensagem, sizeof(mensagem.conteudo),1,0) >= 0){
-        if(mensagem.conteudo.action != 1){
+        if(mensagem.conteudo.action != ACTION_PEDIDO){
             error("S4","Action incorreto");
             exit(-1);
         } 
@@ -459,10 +461,9 @@ Mensagem recebePedido() {
         }
     }
     else{
-        error("S4","Erro na leitura do pedido do Cliente");
+        error("S4","Erro na leitura da mensagem");
         exit(-1);
     }
-    
     debug("S4 >");
     return mensagem;
 }

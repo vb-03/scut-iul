@@ -655,6 +655,7 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
             if(dadosServidor->lista_passagens[i].tipo_passagem == TIPO_PASSAGEM_INVALIDO){ 
                 indiceLista = i;
                 dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
+                semNrUp(semId,SEM_LISTAPASSAGENS);
                 if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_NORMAL){
                     semNrDown(semId,SEM_ESTATISTICAS);
                     dadosServidor->contadores.contadorNormal++;
@@ -665,6 +666,7 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
                     semNrUp(semId,SEM_ESTATISTICAS);
                     }
                 pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado = getpid();
+                semNrDown(semId,SEM_LISTAPASSAGENS);
                 dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
                 semNrUp(semId,SEM_LISTAPASSAGENS);
                 success("SD9","Entrada %d preenchida",indiceLista);

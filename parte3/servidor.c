@@ -437,7 +437,7 @@ int createIPC() {
 Mensagem recebePedido() {
     debug("S4 <");
     Mensagem mensagem;
-    if(msgrcv(msgId,&mensagem, sizeof(mensagem.conteudo),1,0 >= 0)){
+    if(msgrcv(msgId,&mensagem, sizeof(mensagem.conteudo),1,0) >= 0){
         if(mensagem.conteudo.action != 1){
             error("S4","Action incorreto");
             exit(-1);

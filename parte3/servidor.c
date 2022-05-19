@@ -3,8 +3,8 @@
  **
  ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
  ** Nome do Módulo: servidor.c versão 3
- ** Descrição/Explicação do Módulo: 
- **
+ ** Descrição/Explicação do Módulo: Este módulo serve para receber os pedidos
+ ** do cliente, registá-los e manter estatísticas.
  **
  ******************************************************************************/
 #include "common.h"

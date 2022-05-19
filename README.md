@@ -2,9 +2,9 @@
 
 Parte 1 - Shell
 
-Parte 2 - C
+Parte 2 - C com escrita em memória
 
-Parte 3 - ?
+Parte 3 - C com IPC
 
 Enunciados no BlackBoard
 

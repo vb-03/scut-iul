@@ -3,8 +3,8 @@
  **
  ** Aluno: Nº: 104670      Nome: Vasco Mendes Baleia
  ** Nome do Módulo: cliente.c versão 3
- ** Descrição/Explicação do Módulo: 
- **
+ ** Descrição/Explicação do Módulo: Este módulo serve para criar o pedido e
+ ** enviá-lo para o servidor.
  **
  ******************************************************************************/
 #include "common.h"
@@ -77,14 +77,8 @@ int getMsg() {
             exit(-1);
         }
         else{
-        //if(msgId == IPC_KEY){
             success("C1", "%d" , msgId);
         }
-        /* else{
-            error("C1", "Got unexpected IPC KEY");
-            exit(-1);
-        }
-        */
     debug("C1 >");
     return msgId;
 }

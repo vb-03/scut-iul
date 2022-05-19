@@ -126,6 +126,7 @@ Passagem getDadosPedidoUtilizador() {
         else{
                 error("C2", "Tipo de passagem inválido");
                 p.tipo_passagem = -1;
+                exit(-1);
         }
     debug("C2 >");
     return p;
@@ -174,7 +175,7 @@ Mensagem recebeMensagem( int msgId ) {
         exit(-1);
     }
     else{
-        success("C4","Li mensagem do servidor");
+        success("C4","Li mensagem do Servidor");
     }
     debug("C4 >");
     return mensagem;

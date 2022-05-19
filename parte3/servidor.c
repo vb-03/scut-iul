@@ -658,10 +658,12 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
                 dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
                 semNrUp(semId,SEM_ESTATISTICAS);
                 if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_NORMAL){
+                    dadosServidor->lista_passagens[i].pid_servidor_dedicado = pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado;
                     semNrDown(semId,SEM_ESTATISTICAS);
                     dadosServidor->contadores.contadorNormal++;
                     semNrUp(semId,SEM_ESTATISTICAS);
                 }else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_VIAVERDE){
+                    dadosServidor->lista_passagens[i].pid_servidor_dedicado = pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado;
                     semNrDown(semId,SEM_ESTATISTICAS);
                     dadosServidor->contadores.contadorViaVerde++;
                     semNrUp(semId,SEM_ESTATISTICAS);

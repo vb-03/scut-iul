@@ -376,7 +376,7 @@ int shmCreateAndInit() {
  */
 int loadStats( Contadores* pStats ) {
     debug("S2.3 <");
-    int pidServer = getpid();
+    //int pidServer = getpid();
     FILE *stats = fopen(FILE_STATS, "rb");
     if (stats == NULL) {
             pStats->contadorAnomalias = 0;
@@ -655,18 +655,20 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
             if(dadosServidor->lista_passagens[i].tipo_passagem == TIPO_PASSAGEM_INVALIDO){ 
                 indiceLista = i;
                 dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
-                semNrUp(semId,SEM_LISTAPASSAGENS);
+                //semNrUp(semId,SEM_LISTAPASSAGENS);
+                semNrDown(semId,SEM_ESTATISTICAS);
                 if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_NORMAL){
-                    semNrDown(semId,SEM_ESTATISTICAS);
+            
                     dadosServidor->contadores.contadorNormal++;
-                    semNrUp(semId,SEM_ESTATISTICAS);
+                    //semNrUp(semId,SEM_ESTATISTICAS);
                 }else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_VIAVERDE){
-                    semNrDown(semId,SEM_ESTATISTICAS);
+                    //semNrDown(semId,SEM_ESTATISTICAS);
                     dadosServidor->contadores.contadorViaVerde++;
-                    semNrUp(semId,SEM_ESTATISTICAS);
+               
                     }
+                         semNrUp(semId,SEM_ESTATISTICAS);
                 pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado = getpid();
-                semNrDown(semId,SEM_LISTAPASSAGENS);
+                //semNrDown(semId,SEM_LISTAPASSAGENS);
                 dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
                 semNrUp(semId,SEM_LISTAPASSAGENS);
                 success("SD9","Entrada %d preenchida",indiceLista);

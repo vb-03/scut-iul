@@ -378,7 +378,7 @@ int loadStats( Contadores* pStats ) {
             pStats->contadorAnomalias = 0;
             pStats->contadorNormal = 0;
             pStats->contadorViaVerde = 0;
-            success("S2", "Estatísticas Iniciadas");
+            success("S2.3", "Estatísticas Iniciadas");
         }
     else{ 
            if(fread(pStats, sizeof(*pStats), 1, stats) < 1){
@@ -387,7 +387,7 @@ int loadStats( Contadores* pStats ) {
            }
             else{
             fclose(stats);
-            success("S2", "Estatísticas Carregadas");
+            success("S2.3", "Estatísticas Carregadas");
             }
         
     }
@@ -443,7 +443,7 @@ Mensagem recebePedido() {
             exit(-1);
         } 
         else{
-            success("S4","Li pedido do Cliente");
+            success("S4","Li Pedido do Cliente");
         }
     }
     else{
@@ -540,8 +540,8 @@ void trataSinalSIGINT( int sinalRecebido ) {
 int sd_armaSinais() {
     debug("SD7 <");
     signal(SIGHUP,sd_trataSinalSIGHUP);
-    signal(SIGINT,trataSinalSIGINT);
-    success("SD7","Servidor Dedicado Armei Sinais");
+    signal(SIGINT, SIG_IGN);
+    success("SD7","Servidor Dedicado Armei sinais");
     debug("SD7 >");
     return 0;
 }
@@ -780,7 +780,7 @@ void sd_trataSinalSIGHUP(int sinalRecebido) {
         //O cliente recebe a mensagem e informará o utilizador
         }
     success("SD13","Processamento Cancelado");
-    exit(-1);
+    exit(0);
     debug("SD13 >");
 }
 

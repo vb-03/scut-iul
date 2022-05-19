@@ -423,12 +423,12 @@ int createIPC() {
 		    error("S6.3", "Não foi possível remover a message queue");
             exit(-1);
 	    }
+    }
     success("S3","Criei mecanismos IPC");
     semId = semCreate(2);
     if(semId < 0){
         error("SD14","Semáforos não criados");
         exit(-1);
-    }
     }
     semNrSetValue(semId, SEM_ESTATISTICAS,1);
     semNrSetValue(semId, SEM_LISTAPASSAGENS,1);

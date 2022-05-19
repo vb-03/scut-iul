@@ -315,7 +315,7 @@ int shmGet() {
        //Passa para o passo S2 pois este criará a memória
     }
     debug("S1 >");
-    return ( shmId > 0 ); //Maior ou igual
+    return ( shmId >= 0 ); //Maior ou igual
 }
 
 /**
@@ -654,6 +654,7 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(dadosServidor->lista_passagens[i].tipo_passagem == TIPO_PASSAGEM_INVALIDO){ 
                 indiceLista = i;
+                dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
                 if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_NORMAL){
                     semNrDown(semId,SEM_ESTATISTICAS);
                     dadosServidor->contadores.contadorNormal++;

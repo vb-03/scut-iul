@@ -424,6 +424,12 @@ int createIPC() {
         error("SD14","Semáforos não criados");
         exit(-1);
     }
+    else{
+        if (msgctl(msgId, IPC_RMID, NULL) == -1) {
+		    error("S6.3", "Não foi possível remover a message queue");
+            exit(-1);
+	    }
+    }
     semNrSetValue(semId, SEM_ESTATISTICAS,1);
     semNrSetValue(semId, SEM_LISTAPASSAGENS,1);
     debug("S3 >");

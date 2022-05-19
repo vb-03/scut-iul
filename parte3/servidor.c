@@ -417,6 +417,7 @@ int createIPC() {
     signal(SIGCHLD,SIG_IGN);
     if(msgId < 0){
         error("S3","Erro ao criar a message queue");
+        exit(-1);
     }
     else{
         if (msgctl(msgId, IPC_RMID, NULL) == -1) {

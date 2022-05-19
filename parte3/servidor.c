@@ -310,8 +310,8 @@ int shmGet() {
         else{
             success("S1", "Abri Shared Memory já existente com ID %d", shmId);
         }
-    }
-    else{
+    }else{
+        error("S1", "Não existe shared memory");
        //Passa para o passo S2 pois este criará a memória
     }
     debug("S1 >");

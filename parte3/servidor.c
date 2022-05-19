@@ -18,53 +18,53 @@
  * FUNÇÕES IPC SEMÁFOROS
  *****************************************************************************/
 
- /**
-  * @brief Função interna, não é para ser utilizada diretamente pelos alunos
-  */
- int __semGet( int nrSemaforos, int semFlags ) {
-    int id = semget( IPC_KEY, nrSemaforos, semFlags );
-    if ( id < 0 ) {
-        debug( "Não consegui criar/abrir o grupo de semáforos com key=0x%x", IPC_KEY );
-    } else {
-        debug( "Estou a usar o grupo de semáforos com key=0x%x e id=%d", IPC_KEY, id );
-    }
-    return id;
-}
-
 /**
- * @brief Cria um grupo de semáforos IPC associado a IPC_KEY com o número de semáforos passado
- * 
- * @param nrSemaforos número de semáforos deste grupo de semáforos
- * @return int em caso de sucesso, retorna o IPC_ID correspondente. Em caso de erro, retorna -1
+ * @brief Internal Private Function, not to be used by the students.
  */
-int semCreate( int nrSemaforos ) {
-    return __semGet( nrSemaforos, IPC_CREAT | 0666 );
+int __semGet( int nrSemaforos, int semFlags ) {
+    int semId = semget( IPC_KEY, nrSemaforos, semFlags );
+    if ( semId < 0 ) {
+        debug( "Could not create/open the Semaphores Group with key=0x%x", IPC_KEY );
+    } else {
+        debug( "Using the Semaphores Group with key=0x%x and id=%d", IPC_KEY, semId );
+    }
+    return semId;
 }
 
 /**
- * @brief "Liga-se" a um grupo de semáforos IPC associado a IPC_KEY
+ * @brief Creates an IPC Semaphores Group non-exclusively, associated with the IPC_KEY, with the passed number of Semaphores
  * 
- * @return int em caso de sucesso, retorna o IPC_ID correspondente. Em caso de erro, retorna -1
+ * @param nrElements Number of Semaphores of the Group
+ * @return int semId. In case of error, returns -1
+ */
+int semCreate( int nrElements ) {
+    return __semGet( nrElements, IPC_CREAT | 0600 );
+}
+
+/**
+ * @brief Opens an already created IPC Semaphores Group associated with the IPC_KEY
+ * 
+ * @return int semId. In case of error, returns -1
  */
 int semGet() {
     return __semGet( 0, 0 );
 }
 
 /**
- * @brief Remove o grupo de semáforos IPC associado a IPC_KEY
+ * @brief Removes the IPC Semaphores Group associated with the IPC_KEY
  * 
- * @return int 0 if success, -1 if the semaphore group exists and could not be removed
+ * @param semId IPC SemId
+ * @return int 0 if success or if the Semaphores Group already did not exist, or -1 if the Semaphores Group exists and could not be removed
  */
-int semRemove() {
-    int id = semGet();
+int semRemove( int semId ) {
     // Ignore any errors here, as this is only to check if the semaphore group exists and remove it
-    if ( id > 0 ) {
+    if ( semId > 0 ) {
         // If the semaphore group with IPC_KEY already exists, remove it.
-        int result = semctl( id, 0, IPC_RMID, 0 );
+        int result = semctl( semId, 0, IPC_RMID, 0 );
         if ( result < 0) {
-            debug( "Não consegui remover este grupo de semáforos" );
+            debug( "Could not remove the Semaphores Group with key=0x%x and id=%d", IPC_KEY, semId );
         } else {
-            debug( "Removi este grupo de semáforos" );
+            debug( "Removed the Semaphores Group with key=0x%x and id=%d", IPC_KEY, semId );
         }
         return result;
     }
@@ -72,134 +72,138 @@ int semRemove() {
 }
 
 /**
- * @brief Define o valor do semáforo semNr do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Sets the value of the Semaphore semNr of the Semaphore Group associated with IPC_KEY
  * 
- * @param semNr índice do semáforo a definir (começando em 0)
- * @param value valor a ser definido no semáforo semNr
+ * @param semId IPC SemId
+ * @param semNr Index of the Semaphore to set value (starting in 0)
+ * @param value Value to be defined in the Semaphore semNr
  * @return int success
  */
-int semNrSetValue( int semNr, int value ) {
-    int id = semGet();
-    exit_on_error( id, "Erro semget" );
-    int result = semctl( id, semNr, SETVAL, value );
+int semNrSetValue( int semId, int semNr, int value ) {
+    int result = semctl( semId, semNr, SETVAL, value );
     if ( result < 0) {
-        debug( "Não consegui definir o valor do semáforo %d deste grupo de semáforos", semNr );
+        debug( "Could not set the value of the Semaphore %d of this Semaphore Group", semNr );
     } else {
-        debug( "O semáforo %d deste grupo de semáforos ficou com o valor %d", semNr, value );
+        debug( "The Semaphore %d of this Semaphore Group was set with value %d", semNr, value );
     }
     return result;
 }
 
 /**
- * @brief Define o valor do semáforo 0 do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Sets the value of the Semaphore 0 of the Semaphore Group associated with IPC_KEY
  * 
- * @param value valor a ser definido no semáforo 0
+ * @param semId IPC SemId
+ * @param value Value to be defined in the Semaphore semNr
  * @return int success
  */
-int semSetValue( int value ) {
-    return semNrSetValue( 0, value );
+int semSetValue( int semId, int value ) {
+    return semNrSetValue( semId, 0, value );
 }
 
 /**
- * @brief Obtém o valor do semáforo semNr do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Gets the value of the Semaphore semNr of the Semaphore Group associated with IPC_KEY
  * 
- * @param semNr índice do semáforo cujo valor queremos obter (começando em 0)
- * @return int valor do semáforo, ou -1 em caso de erro
+ * @param semId IPC SemId
+ * @param semNr Index of the Semaphore to set value (starting in 0)
+ * @return int Value of the Semaphore, or -1 in case of error
  */
-int semNrGetValue( int semNr ) {
-    int id = semGet();
-    exit_on_error( id, "Erro semget" );
-    int result = semctl( id, semNr, GETVAL, 0 );
+int semNrGetValue( int semId, int semNr ) {
+    int result = semctl( semId, semNr, GETVAL, 0 );
     if ( result < 0 ) {
-        debug( "Não consegui obter o valor do semáforo %d deste grupo de semáforos", semNr );
+        debug( "Could not get the value of the Semaphore %d of this Semaphore Group", semNr );
     } else {
-        debug( "O semáforo %d deste grupo de semáforos tem o valor %d", semNr, result );
+        debug( "The Semaphore %d of this Semaphore Group has the value %d", semNr, result );
     }
     return result;
 }
 
 /**
- * @brief Obtém o valor do semáforo 0 do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Gets the value of the Semaphore 0 of the Semaphore Group associated with IPC_KEY
  * 
- * @return int valor do semáforo, ou -1 em caso de erro
+ * @param semId IPC SemId
+ * @return int Value of the Semaphore, or -1 in case of error
  */
-int semGetValue() {
-    return semNrGetValue( 0 );
+int semGetValue( int semId ) {
+    return semNrGetValue( semId, 0 );
 }
 
 /**
- * @brief Adiciona um valor ao semáforo semNr do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Adds a value to the current value the Semaphore semNr of the Semaphore Group associated with IPC_KEY
  * 
- * @param semNr índice do semáforo a adicionar um valor (começando em 0)
- * @param addValue valor a ser adicionado no semáforo semNr
+ * @param semId IPC SemId
+ * @param semNr Index of the Semaphore to set value (starting in 0)
+ * @param value Value to be added to the value of the Semaphore semNr
  * @return int success
  */
-int semNrAddValue( int semNr, int addValue ) {
-    int id = semGet();
-    exit_on_error( id, "Erro semget" );
-    int result = semctl( id, semNr, GETVAL, 0 );
-    exit_on_error( result, "Erro semctl" );
-    debug( "O semáforo %d deste grupo de semáforos tinha o valor %d", semNr, result );
+int semNrAddValue( int semId, int semNr, int addValue ) {
+    int result = semctl( semId, semNr, GETVAL, 0 );
+    exit_on_error( result, "Error on semctl" );
+    debug( "The Semaphore %d of this Semaphore Group had the value %d", semNr, result );
   
     struct sembuf operation = { semNr, addValue, 0 };
-    result = semop( id, &operation, 1 );
+    result = semop( semId, &operation, 1 );
 
     if ( result < 0 ) {
-        debug( "Não consegui adicionar o valor %d ao semáforo %d deste grupo de semáforos", addValue, semNr );
+        debug( "Could not add the value %d to the value of the Semaphore %d of this Semaphore Group", addValue, semNr );
     } else {
-        result = semctl( id, semNr, GETVAL, 0 );
-        exit_on_error( result, "Erro semctl" );
-        debug( "O semáforo %d deste grupo de semáforos passou a ter o valor %d", semNr, result );
+        result = semctl( semId, semNr, GETVAL, 0 );
+        exit_on_error( result, "Error on semctl" );
+        debug( "The Semaphore %d of this Semaphore Group now has the value %d", semNr, result );
     }
     return result;
 }
 
 /**
- * @brief Adiciona um valor ao semáforo 0 do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Adds a value to the current value the Semaphore 0 of the Semaphore Group associated with IPC_KEY
  * 
- * @param addValue valor a ser adicionado no semáforo 0
+ * @param semId IPC SemId
+ * @param value Value to be added to the value of the Semaphore semNr
  * @return int success
  */
-int semAddValue( int addValue ) {
-    return semNrAddValue( 0, addValue );
+int semAddValue( int semId, int addValue ) {
+    return semNrAddValue( semId, 0, addValue );
 }
 
 /**
- * @brief Adiciona 1 ao semáforo semNr do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Adds 1 (one) to the current value the Semaphore semNr of the Semaphore Group associated with IPC_KEY
  * 
- * @param semNr índice do semáforo cujo valor queremos obter (começando em 0)
+ * @param semId IPC SemId
+ * @param semNr Index of the Semaphore to set value (starting in 0)
  * @return int success
  */
-int semNrUp( int semNr ) {
-    return semNrAddValue( semNr, 1 );
+int semNrUp( int semId, int semNr ) {
+    return semNrAddValue( semId, semNr, 1 );
 }
 
 /**
- * @brief Adiciona -1 ao semáforo semNr do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Adds -1 (minus one) to the current value the Semaphore semNr of the Semaphore Group associated with IPC_KEY
  * 
- * @param semNr índice do semáforo cujo valor queremos obter (começando em 0)
+ * @param semId IPC SemId
+ * @param semNr Index of the Semaphore to set value (starting in 0)
  * @return int success
  */
-int semNrDown( int semNr ) {
-    return semNrAddValue( semNr, -1 );
+int semNrDown( int semId, int semNr ) {
+    return semNrAddValue( semId, semNr, -1 );
 }
 
 /**
- * @brief Adiciona 1 ao semáforo 0 do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Adds 1 (one) to the current value the Semaphore 0 of the Semaphore Group associated with IPC_KEY
  * 
+ * @param semId IPC SemId
  * @return int success
  */
-int semUp() {
-    return semAddValue( 1 );
+int semUp( int semId ) {
+    return semAddValue( semId, 1 );
 }
 
 /**
- * @brief Adiciona -1 ao semáforo 0 do grupo de semáforos IPC associado a IPC_KEY
+ * @brief Adds -1 (minus one) to the current value the Semaphore 0 of the Semaphore Group associated with IPC_KEY
  * 
+ * @param semId IPC SemId
  * @return int success
  */
-int semDown() {
-    return semAddValue( -1 );
+int semDown( int semId ) {
+    return semAddValue( semId, -1 );
 }
 
 /* Variáveis globais */
@@ -518,7 +522,7 @@ void trataSinalSIGINT( int sinalRecebido ) {
             }
         }
         //S6.3
-        if(semRemove() < 0)
+        if(semRemove(semId) < 0)
             error("S6.3","Erro ao remover semáforos");
         success("S6.3","Shutdown Servidor completo");
         if(msgctl( msgId, IPC_RMID, NULL) < 0 ){

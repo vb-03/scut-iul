@@ -421,7 +421,7 @@ int createIPC() {
     }
     else{
         if (msgctl(msgId, IPC_RMID, NULL) == -1) {
-		    error("S6.3", "Não foi possível remover a message queue");
+		    error("S3", "Não foi possível remover a message queue");
             exit(-1);
 	    }
     }

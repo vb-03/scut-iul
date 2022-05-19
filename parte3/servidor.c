@@ -300,7 +300,7 @@ void shmView( DadosServidor* shm, int ignoreInvalid ) {
  */
 int shmGet() {
     debug("S1 <");
-    shmId = shmget(IPC_KEY,sizeof(*dadosServidor),0666);
+    shmId = shmget(IPC_KEY, 0, 0);
     if(shmId >= 0){
         dadosServidor = shmat(shmId, 0, 0);
         if(dadosServidor == NULL ){

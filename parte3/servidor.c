@@ -654,21 +654,17 @@ int sd_reservaEntradaBD( DadosServidor* dadosServidor, Mensagem pedido ) {
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if(dadosServidor->lista_passagens[i].tipo_passagem == TIPO_PASSAGEM_INVALIDO){ 
                 indiceLista = i;
-                semNrDown(semId,SEM_ESTATISTICAS);
-                dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
-                semNrUp(semId,SEM_ESTATISTICAS);
                 if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_NORMAL){
-                    dadosServidor->lista_passagens[i].pid_servidor_dedicado = pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado;
                     semNrDown(semId,SEM_ESTATISTICAS);
                     dadosServidor->contadores.contadorNormal++;
                     semNrUp(semId,SEM_ESTATISTICAS);
                 }else if(pedido.conteudo.dados.pedido_cliente.tipo_passagem == TIPO_PASSAGEM_VIAVERDE){
-                    dadosServidor->lista_passagens[i].pid_servidor_dedicado = pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado;
                     semNrDown(semId,SEM_ESTATISTICAS);
                     dadosServidor->contadores.contadorViaVerde++;
                     semNrUp(semId,SEM_ESTATISTICAS);
                     }
                 pedido.conteudo.dados.pedido_cliente.pid_servidor_dedicado = getpid();
+                dadosServidor->lista_passagens[i] = pedido.conteudo.dados.pedido_cliente;
                 semNrUp(semId,SEM_LISTAPASSAGENS);
                 success("SD9","Entrada %d preenchida",indiceLista);
                 return indiceLista;

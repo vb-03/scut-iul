@@ -170,7 +170,7 @@ Mensagem recebeMensagem( int msgId ) {
     debug("C4 <");
     Mensagem mensagem;
     //pause();    // Código temporário para o Cliente não ficar em espera ativa, os alunos deverão remover esta linha quando a leitura à message queue estiver feita.
-    if(msgrcv(msgId, &mensagem, sizeof(mensagem),getpid(), 0) < 0){
+    if(msgrcv(msgId, &mensagem, sizeof(mensagem.conteudo),getpid(), 0) < 0){
         error("C4", "Erro ao receber a mensagem");
         exit(-1);
     }

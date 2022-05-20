@@ -506,13 +506,13 @@ void trataSinalSIGINT( int sinalRecebido ) {
     debug("S6 <");
     success("S6", "Shutdown Servidor");
         //S6.1
-        semNrDown(semId, SEM_ESTATISTICAS);
+        semNrDown(semId, SEM_LISTAPASSAGENS);
         for(int i = 0; i < NUM_PASSAGENS; i++){
             if (dadosServidor->lista_passagens[i].tipo_passagem > 0){
                 kill(dadosServidor->lista_passagens[i].pid_servidor_dedicado, SIGHUP);
             }
         }
-        semNrUp(semId,SEM_ESTATISTICAS);
+        semNrUp(semId,SEM_LISTAPASSAGENS);
         success("S6.1", "Shutdown Servidores Dedicados");
         //S6.2
         FILE* st = fopen(FILE_STATS,"wb");
